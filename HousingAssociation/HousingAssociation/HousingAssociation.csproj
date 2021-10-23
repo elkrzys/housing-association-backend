@@ -8,20 +8,4 @@
       <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Models\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <EmbeddedResource Remove="Models\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Models\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Remove="Models\**" />
-    </ItemGroup>
-
 </Project>
