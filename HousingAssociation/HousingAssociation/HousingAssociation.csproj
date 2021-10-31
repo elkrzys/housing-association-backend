@@ -5,7 +5,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Dapper" Version="2.0.90" />
+      <PackageReference Include="Npgsql" Version="6.0.0-rc.2" />
       <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="DataAccess" />
     </ItemGroup>
 
 </Project>
