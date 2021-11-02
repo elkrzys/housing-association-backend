@@ -1,13 +1,15 @@
 ﻿using System.Collections.Generic;
+using DataAccess.Context;
 using HousingAssociation.Models;
 
 namespace HousingAssociation.Repositories
 {
     public class EventsRepository
     {
-        public EventsRepository()
+        private readonly IDbContext _dbContext;
+        public EventsRepository(IDbContext dbContext)
         {
-                
+            _dbContext = dbContext;
         }
 
         public List<Event> FindAll()
@@ -19,6 +21,16 @@ namespace HousingAssociation.Repositories
         {
             
             return new Issue(); // Announcement
+        }
+
+        public IEnumerable<Event> FindAllByAuthorId(int authorId)
+        {
+            return null;
+        }
+
+        public IEnumerable<Event> FindAllByBlockId(int blockId)
+        {
+            return null;
         }
 
         public int Add(Event e)

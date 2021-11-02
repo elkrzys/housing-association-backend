@@ -1,13 +1,16 @@
 ﻿using System.Collections.Generic;
+using Dapper;
+using DataAccess.Context;
 using HousingAssociation.Models;
 
 namespace HousingAssociation.Repositories
 {
     public class LocalsRepository
     {
-        public LocalsRepository()
+        private readonly IDbContext _dbContext;
+        public LocalsRepository(IDbContext dbContext)
         {
-                
+            _dbContext = dbContext;
         }
 
         public List<Local> FindAll()
@@ -15,25 +18,55 @@ namespace HousingAssociation.Repositories
             return new List<Local>();
         }
 
-        public List<Local> FindAllByBuildingId(int buildingId)
+        public IEnumerable<Local> FindAllByBuildingId(int buildingId)
         {
-            return new List<Local>();
+            var statement = "select * from sysadm.locals where building_id = @buildingId";
+            
+            using var conn = _dbContext.Connection;
+            return conn.Query<Local>(statement, buildingId);
         }
 
         public Local FindById(int id)
         {
-            return new Local();
+            var statement = "select * from sysadm.locals where id = @id";
+            
+            using var conn = _dbContext.Connection;
+            return conn.QuerySingleOrDefault<Local>(statement, id);
         }
 
         public int Add(Local local)
         {
-            int id = 0;
-            return id;
+            var statement = @"insert into sysadm.locals (number, area, building_id, is_fully_owned) 
+                                values (@Number, @Area, @BuildingId, @IsFullyOwned) returning id";
+
+            var parameters = new
+            {
+                local.Number,
+                local.Area,
+                local.BuildingId,
+                local.IsFullyOwned
+            };
+            
+            using var conn = _dbContext.Connection;
+            return conn.ExecuteScalar<int>(statement, parameters);
         }
 
         public void Update(Local local)
         {
+            var statement = @"update sysadm.locals set number = @Number, area = @Area, building_id = @BuildingId, is_fully_owned = @IsFullyOwned
+                                where id = @Id";
+
+            var parameters = new
+            {
+                local.Id,
+                local.Number,
+                local.Area,
+                local.BuildingId,
+                local.IsFullyOwned
+            };
             
+            using var conn = _dbContext.Connection;
+            conn.Execute(statement, parameters);
         }
 
         public void Delete(int id)

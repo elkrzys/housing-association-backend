@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using DataAccess.Context;
 using HousingAssociation.DataAccess.Context;
 using HousingAssociation.DataAccess.Settings;
+using HousingAssociation.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -34,9 +30,18 @@ namespace HousingAssociation
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddMvc().AddNewtonsoftJson();
             
+            // Database Context
             var dbSettings = Configuration.GetSection(nameof(DbSettings)).Get<DbSettings>();
             services.AddScoped<IDbContext>(provider => new DbContext(dbSettings.ConnectionString));
+            
+            // Repositories
+            services.AddScoped<BuildingsRepository>();
+            services.AddScoped<LocalsRepository>();
+            services.AddScoped<EventsRepository>();
+            
+            //Services
             
             services.AddSwaggerGen();
         }
