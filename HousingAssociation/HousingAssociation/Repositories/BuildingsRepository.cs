@@ -24,7 +24,7 @@ namespace HousingAssociation.Repositories
             var statement = "select * from sysadm.buildings where id = @id";
             
             using var conn = _dbContext.Connection;
-            return conn.QuerySingleOrDefault<Building>(statement, id);
+            return conn.QuerySingleOrDefault<Building>(statement, new { id });
         }
 
         public int Add(Building building)
@@ -69,7 +69,7 @@ namespace HousingAssociation.Repositories
             var statement = "delete from sysadm.buildings where id = @buildingId";
             
             using var conn = _dbContext.Connection;
-            conn.Execute(statement, buildingId);
+            conn.Execute(statement, new { buildingId });
         }
     }
 }

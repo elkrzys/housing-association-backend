@@ -23,7 +23,7 @@ namespace HousingAssociation.Repositories
             var statement = "select * from sysadm.locals where building_id = @buildingId";
             
             using var conn = _dbContext.Connection;
-            return conn.Query<Local>(statement, buildingId);
+            return conn.Query<Local>(statement, new { buildingId });
         }
 
         public Local FindById(int id)
@@ -31,7 +31,7 @@ namespace HousingAssociation.Repositories
             var statement = "select * from sysadm.locals where id = @id";
             
             using var conn = _dbContext.Connection;
-            return conn.QuerySingleOrDefault<Local>(statement, id);
+            return conn.QuerySingleOrDefault<Local>(statement, new { id });
         }
 
         public int Add(Local local)

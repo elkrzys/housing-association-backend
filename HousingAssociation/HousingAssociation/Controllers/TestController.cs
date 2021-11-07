@@ -2,6 +2,7 @@
 using HousingAssociation.Models;
 using HousingAssociation.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using DataAccess;
 
 namespace HousingAssociation.Controllers
 {
@@ -23,10 +24,10 @@ namespace HousingAssociation.Controllers
         }
         
         [HttpPost]
-        public ActionResult<Building> GetCurrentDate(Building building)
+        public ActionResult<Building> AddBuilding(Building building)
         {
             var id= _buildingsRepository.Add(building);
-            return Ok();
+            return Ok(_buildingsRepository.FindById(id));
         }
     }
 }
