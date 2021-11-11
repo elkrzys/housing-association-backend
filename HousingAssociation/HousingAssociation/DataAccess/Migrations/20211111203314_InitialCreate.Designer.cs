@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace HousingAssociation.Migrations
+namespace HousingAssociation.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20211111203314_InitialCreate")]

@@ -18,10 +18,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Migrations" />
-    </ItemGroup>
-
-    <ItemGroup>
       <Compile Include="Models\UserWall.cs" />
       <Compile Include="Models\WorkerWall.cs" />
     </ItemGroup>

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace HousingAssociation.Migrations
+namespace HousingAssociation.DataAccess.Migrations
 {
     public partial class InitialCreate : Migration
     {
