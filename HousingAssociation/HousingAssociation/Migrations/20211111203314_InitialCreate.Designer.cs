@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HousingAssociation.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20211107233759_InitialCreate")]
+    [Migration("20211111203314_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,7 +21,45 @@ namespace HousingAssociation.Migrations
                 .HasAnnotation("ProductVersion", "5.0.11")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.Address", b =>
+            modelBuilder.Entity("AnnouncementBuilding", b =>
+                {
+                    b.Property<int>("AnnouncementsId")
+                        .HasColumnType("integer")
+                        .HasColumnName("announcements_id");
+
+                    b.Property<int>("TargetBuildingsId")
+                        .HasColumnType("integer")
+                        .HasColumnName("target_buildings_id");
+
+                    b.HasKey("AnnouncementsId", "TargetBuildingsId")
+                        .HasName("pk_announcements_buildings");
+
+                    b.HasIndex("TargetBuildingsId")
+                        .HasDatabaseName("ix_announcements_buildings_target_buildings_id");
+
+                    b.ToTable("announcements_buildings");
+                });
+
+            modelBuilder.Entity("DocumentUser", b =>
+                {
+                    b.Property<int>("DocumentsId")
+                        .HasColumnType("integer")
+                        .HasColumnName("documents_id");
+
+                    b.Property<int>("ReceiversId")
+                        .HasColumnType("integer")
+                        .HasColumnName("receivers_id");
+
+                    b.HasKey("DocumentsId", "ReceiversId")
+                        .HasName("pk_users_documents");
+
+                    b.HasIndex("ReceiversId")
+                        .HasDatabaseName("ix_users_documents_receivers_id");
+
+                    b.ToTable("users_documents");
+                });
+
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Address", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -52,7 +90,7 @@ namespace HousingAssociation.Migrations
                     b.ToTable("addresses");
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.Announcement", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Announcement", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -60,7 +98,7 @@ namespace HousingAssociation.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int?>("AuthorId")
+                    b.Property<int>("AuthorId")
                         .HasColumnType("integer")
                         .HasColumnName("author_id");
 
@@ -73,7 +111,7 @@ namespace HousingAssociation.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<DateTime>("ExpirationDate")
+                    b.Property<DateTime?>("ExpirationDate")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("expiration_date");
 
@@ -102,7 +140,7 @@ namespace HousingAssociation.Migrations
                     b.HasCheckConstraint("CK_announcements_type_Enum", "type IN ('Issue', 'Announcement', 'Alert')");
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.Building", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Building", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -113,10 +151,6 @@ namespace HousingAssociation.Migrations
                     b.Property<int?>("AddressId")
                         .HasColumnType("integer")
                         .HasColumnName("address_id");
-
-                    b.Property<int?>("AnnouncementId")
-                        .HasColumnType("integer")
-                        .HasColumnName("announcement_id");
 
                     b.Property<string>("Number")
                         .IsRequired()
@@ -135,15 +169,12 @@ namespace HousingAssociation.Migrations
                     b.HasIndex("AddressId")
                         .HasDatabaseName("ix_buildings_address_id");
 
-                    b.HasIndex("AnnouncementId")
-                        .HasDatabaseName("ix_buildings_announcement_id");
-
                     b.ToTable("buildings");
 
                     b.HasCheckConstraint("CK_buildings_type_Enum", "type IN ('Block', 'House')");
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.Document", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Document", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -176,12 +207,13 @@ namespace HousingAssociation.Migrations
                         .HasName("pk_documents");
 
                     b.HasIndex("AuthorId")
+                        .IsUnique()
                         .HasDatabaseName("ix_documents_author_id");
 
                     b.ToTable("documents");
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.Issue", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Issue", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -189,7 +221,7 @@ namespace HousingAssociation.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int?>("AuthorId")
+                    b.Property<int>("AuthorId")
                         .HasColumnType("integer")
                         .HasColumnName("author_id");
 
@@ -206,7 +238,7 @@ namespace HousingAssociation.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_resolved_or_cancelled");
 
-                    b.Property<int?>("SourceBuildingId")
+                    b.Property<int>("SourceBuildingId")
                         .HasColumnType("integer")
                         .HasColumnName("source_building_id");
 
@@ -228,6 +260,7 @@ namespace HousingAssociation.Migrations
                         .HasName("pk_issues");
 
                     b.HasIndex("AuthorId")
+                        .IsUnique()
                         .HasDatabaseName("ix_issues_author_id");
 
                     b.HasIndex("SourceBuildingId")
@@ -241,7 +274,7 @@ namespace HousingAssociation.Migrations
                     b.HasCheckConstraint("CK_issues_type_Enum", "type IN ('Issue', 'Announcement', 'Alert')");
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.Local", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Local", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -249,7 +282,7 @@ namespace HousingAssociation.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<float>("Area")
+                    b.Property<float?>("Area")
                         .HasColumnType("real")
                         .HasColumnName("area");
 
@@ -261,7 +294,7 @@ namespace HousingAssociation.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_fully_owned");
 
-                    b.Property<int>("Number")
+                    b.Property<int?>("Number")
                         .HasColumnType("integer")
                         .HasColumnName("number");
 
@@ -274,17 +307,13 @@ namespace HousingAssociation.Migrations
                     b.ToTable("locals");
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.User", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<int?>("DocumentId")
-                        .HasColumnType("integer")
-                        .HasColumnName("document_id");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -322,15 +351,12 @@ namespace HousingAssociation.Migrations
                     b.HasKey("Id")
                         .HasName("pk_users");
 
-                    b.HasIndex("DocumentId")
-                        .HasDatabaseName("ix_users_document_id");
-
                     b.ToTable("users");
 
                     b.HasCheckConstraint("CK_users_role_Enum", "role IN ('Admin', 'Worker', 'Resident')");
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.UserCredentials", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.UserCredentials", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("integer")
@@ -346,6 +372,23 @@ namespace HousingAssociation.Migrations
                         .HasName("pk_credentials");
 
                     b.ToTable("credentials");
+                });
+
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.UserRefreshToken", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("RefreshToken")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("refresh_token");
+
+                    b.HasKey("UserId")
+                        .HasName("pk_refresh_tokens");
+
+                    b.ToTable("refresh_tokens");
                 });
 
             modelBuilder.Entity("LocalUser", b =>
@@ -386,36 +429,67 @@ namespace HousingAssociation.Migrations
                     b.ToTable("locals_owners");
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.Announcement", b =>
+            modelBuilder.Entity("AnnouncementBuilding", b =>
                 {
-                    b.HasOne("HousingAssociation.DataAccess.Models.User", "Author")
+                    b.HasOne("HousingAssociation.DataAccess.Entities.Announcement", null)
+                        .WithMany()
+                        .HasForeignKey("AnnouncementsId")
+                        .HasConstraintName("fk_announcements_buildings_announcements_announcements_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HousingAssociation.DataAccess.Entities.Building", null)
+                        .WithMany()
+                        .HasForeignKey("TargetBuildingsId")
+                        .HasConstraintName("fk_announcements_buildings_buildings_target_buildings_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DocumentUser", b =>
+                {
+                    b.HasOne("HousingAssociation.DataAccess.Entities.Document", null)
+                        .WithMany()
+                        .HasForeignKey("DocumentsId")
+                        .HasConstraintName("fk_users_documents_documents_documents_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HousingAssociation.DataAccess.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("ReceiversId")
+                        .HasConstraintName("fk_users_documents_users_receivers_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Announcement", b =>
+                {
+                    b.HasOne("HousingAssociation.DataAccess.Entities.User", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId")
-                        .HasConstraintName("fk_announcements_users_author_id");
+                        .HasConstraintName("fk_announcements_users_author_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Author");
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.Building", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Building", b =>
                 {
-                    b.HasOne("HousingAssociation.DataAccess.Models.Address", "Address")
+                    b.HasOne("HousingAssociation.DataAccess.Entities.Address", "Address")
                         .WithMany()
                         .HasForeignKey("AddressId")
                         .HasConstraintName("fk_buildings_addresses_address_id");
 
-                    b.HasOne("HousingAssociation.DataAccess.Models.Announcement", null)
-                        .WithMany("TargetBuildings")
-                        .HasForeignKey("AnnouncementId")
-                        .HasConstraintName("fk_buildings_announcements_announcement_id");
-
                     b.Navigation("Address");
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.Document", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Document", b =>
                 {
-                    b.HasOne("HousingAssociation.DataAccess.Models.User", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
+                    b.HasOne("HousingAssociation.DataAccess.Entities.User", "Author")
+                        .WithOne("Document")
+                        .HasForeignKey("HousingAssociation.DataAccess.Entities.Document", "AuthorId")
                         .HasConstraintName("fk_documents_users_author_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -423,33 +497,37 @@ namespace HousingAssociation.Migrations
                     b.Navigation("Author");
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.Issue", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Issue", b =>
                 {
-                    b.HasOne("HousingAssociation.DataAccess.Models.User", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .HasConstraintName("fk_issues_users_author_id");
+                    b.HasOne("HousingAssociation.DataAccess.Entities.User", "Author")
+                        .WithOne("Issue")
+                        .HasForeignKey("HousingAssociation.DataAccess.Entities.Issue", "AuthorId")
+                        .HasConstraintName("fk_issues_users_author_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("HousingAssociation.DataAccess.Models.Building", "SourceBuilding")
+                    b.HasOne("HousingAssociation.DataAccess.Entities.Building", "Building")
                         .WithMany()
                         .HasForeignKey("SourceBuildingId")
-                        .HasConstraintName("fk_issues_buildings_source_building_id");
+                        .HasConstraintName("fk_issues_buildings_source_building_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("HousingAssociation.DataAccess.Models.Local", "SourceLocal")
+                    b.HasOne("HousingAssociation.DataAccess.Entities.Local", "Local")
                         .WithMany()
                         .HasForeignKey("SourceLocalId")
                         .HasConstraintName("fk_issues_locals_source_local_id");
 
                     b.Navigation("Author");
 
-                    b.Navigation("SourceBuilding");
+                    b.Navigation("Building");
 
-                    b.Navigation("SourceLocal");
+                    b.Navigation("Local");
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.Local", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Local", b =>
                 {
-                    b.HasOne("HousingAssociation.DataAccess.Models.Building", null)
+                    b.HasOne("HousingAssociation.DataAccess.Entities.Building", null)
                         .WithMany("Locals")
                         .HasForeignKey("BuildingId")
                         .HasConstraintName("fk_locals_buildings_building_id")
@@ -457,20 +535,24 @@ namespace HousingAssociation.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.User", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.UserCredentials", b =>
                 {
-                    b.HasOne("HousingAssociation.DataAccess.Models.Document", null)
-                        .WithMany("Receivers")
-                        .HasForeignKey("DocumentId")
-                        .HasConstraintName("fk_users_documents_document_id");
+                    b.HasOne("HousingAssociation.DataAccess.Entities.User", "User")
+                        .WithOne("UserCredentials")
+                        .HasForeignKey("HousingAssociation.DataAccess.Entities.UserCredentials", "UserId")
+                        .HasConstraintName("fk_credentials_users_user_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.UserCredentials", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.UserRefreshToken", b =>
                 {
-                    b.HasOne("HousingAssociation.DataAccess.Models.User", "User")
-                        .WithOne("UserCredentials")
-                        .HasForeignKey("HousingAssociation.DataAccess.Models.UserCredentials", "UserId")
-                        .HasConstraintName("fk_credentials_users_user_id")
+                    b.HasOne("HousingAssociation.DataAccess.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .HasConstraintName("fk_refresh_tokens_users_user_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -479,14 +561,14 @@ namespace HousingAssociation.Migrations
 
             modelBuilder.Entity("LocalUser", b =>
                 {
-                    b.HasOne("HousingAssociation.DataAccess.Models.Local", null)
+                    b.HasOne("HousingAssociation.DataAccess.Entities.Local", null)
                         .WithMany()
                         .HasForeignKey("ResidedLocalsId")
                         .HasConstraintName("fk_locals_residents_locals_resided_locals_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HousingAssociation.DataAccess.Models.User", null)
+                    b.HasOne("HousingAssociation.DataAccess.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("ResidentsId")
                         .HasConstraintName("fk_locals_residents_users_residents_id")
@@ -496,14 +578,14 @@ namespace HousingAssociation.Migrations
 
             modelBuilder.Entity("LocalUser1", b =>
                 {
-                    b.HasOne("HousingAssociation.DataAccess.Models.Local", null)
+                    b.HasOne("HousingAssociation.DataAccess.Entities.Local", null)
                         .WithMany()
                         .HasForeignKey("OwnedLocalsId")
                         .HasConstraintName("fk_locals_owners_locals_owned_locals_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HousingAssociation.DataAccess.Models.User", null)
+                    b.HasOne("HousingAssociation.DataAccess.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("OwnersId")
                         .HasConstraintName("fk_locals_owners_users_owners_id")
@@ -511,23 +593,17 @@ namespace HousingAssociation.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.Announcement", b =>
-                {
-                    b.Navigation("TargetBuildings");
-                });
-
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.Building", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Building", b =>
                 {
                     b.Navigation("Locals");
                 });
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.Document", b =>
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.User", b =>
                 {
-                    b.Navigation("Receivers");
-                });
+                    b.Navigation("Document");
 
-            modelBuilder.Entity("HousingAssociation.DataAccess.Models.User", b =>
-                {
+                    b.Navigation("Issue");
+
                     b.Navigation("UserCredentials");
                 });
 #pragma warning restore 612, 618

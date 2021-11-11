@@ -3,26 +3,25 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace HousingAssociation.DataAccess.Models
+namespace HousingAssociation.DataAccess.Entities
 {
     public class Document
     {
-        public int Id { get; set; }
+        [Key] public int Id { get; set; }
         public string Title { get; set; }
         
-        [ForeignKey(nameof(User))]
+        [ForeignKey("Author")]
         public int AuthorId { get; set; }
         public User Author { get; set; }
-
         public List<User> Receivers { get; set; }
-
-        [Required]
-        public DateTime CreatedAt { get; set; }
         
-        [Required]
-        public string Filepath { get; set; }
+        
+        
+        
+        
+        [Required] public DateTime CreatedAt { get; set; }
+        [Required] public string Filepath { get; set; }
         public int? DaysToExpire { get; set; }
-        
         public DateTime? RemovesAt
         {
             get
@@ -34,5 +33,6 @@ namespace HousingAssociation.DataAccess.Models
                 return null;
             }   
         }
+  
     }
 }

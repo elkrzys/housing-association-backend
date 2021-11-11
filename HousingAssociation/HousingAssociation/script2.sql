@@ -19,7 +19,6 @@ CREATE TABLE buildings (
     number character varying(255) NOT NULL,
     address_id integer NULL,
     type text NOT NULL,
-    announcement_id integer NULL,
     CONSTRAINT pk_buildings PRIMARY KEY (id),
     CONSTRAINT "CK_buildings_type_Enum" CHECK (type IN ('Block', 'House')),
     CONSTRAINT fk_buildings_addresses_address_id FOREIGN KEY (address_id) REFERENCES addresses (id) ON DELETE RESTRICT
@@ -33,6 +32,13 @@ CREATE TABLE locals (
     is_fully_owned boolean NOT NULL,
     CONSTRAINT pk_locals PRIMARY KEY (id),
     CONSTRAINT fk_locals_buildings_building_id FOREIGN KEY (building_id) REFERENCES buildings (id) ON DELETE CASCADE
+);
+
+CREATE TABLE announcements_buildings (
+    announcement_id integer NOT NULL,
+    building_id integer NOT NULL,
+    CONSTRAINT pk_announcements_buildings PRIMARY KEY (announcement_id, building_id),
+    CONSTRAINT fk_announcements_buildings_buildings_target_buildings_id FOREIGN KEY (building_id) REFERENCES buildings (id) ON DELETE CASCADE
 );
 
 CREATE TABLE issues (
@@ -121,9 +127,9 @@ CREATE TABLE refresh_tokens (
 
 CREATE INDEX ix_announcements_author_id ON announcements (author_id);
 
-CREATE INDEX ix_buildings_address_id ON buildings (address_id);
+CREATE INDEX ix_announcements_buildings_target_buildings_id ON announcements_buildings (building_id);
 
-CREATE INDEX ix_buildings_announcement_id ON buildings (announcement_id);
+CREATE INDEX ix_buildings_address_id ON buildings (address_id);
 
 CREATE INDEX ix_documents_author_id ON documents (author_id);
 
@@ -141,14 +147,14 @@ CREATE INDEX ix_locals_residents_residents_id ON locals_residents (residents_id)
 
 CREATE INDEX ix_users_document_id ON users (document_id);
 
-ALTER TABLE buildings ADD CONSTRAINT fk_buildings_announcements_announcement_id FOREIGN KEY (announcement_id) REFERENCES announcements (id) ON DELETE RESTRICT;
+ALTER TABLE announcements_buildings ADD CONSTRAINT fk_announcements_buildings_announcements_announcements_id FOREIGN KEY (announcement_id) REFERENCES announcements (id) ON DELETE CASCADE;
 
 ALTER TABLE issues ADD CONSTRAINT fk_issues_users_author_id FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE RESTRICT;
 
 ALTER TABLE users ADD CONSTRAINT fk_users_documents_document_id FOREIGN KEY (document_id) REFERENCES documents (id) ON DELETE RESTRICT;
 
 INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-VALUES ('20211108142457_InitialCreate', '5.0.11');
+VALUES ('20211109233219_InitialCreate', '5.0.11');
 
 COMMIT;
 

@@ -1,6 +1,7 @@
 using System.Xml.Serialization;
 using DataAccess.Settings;
 using HousingAssociation.DataAccess;
+using HousingAssociation.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -30,12 +31,16 @@ namespace HousingAssociation
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddMvc().AddNewtonsoftJson();
+            
             services.AddSwaggerGen();
 
             var dbSettings = Configuration.GetSection(nameof(DbSettings)).Get<DbSettings>();
             services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(dbSettings.ConnectionString)
             );
+
+            services.AddScoped<BuildingsRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
