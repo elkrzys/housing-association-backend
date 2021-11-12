@@ -5,6 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="BCrypt.Net-Next" Version="4.0.2" />
       <PackageReference Include="EFCore.CheckConstraints" Version="5.0.1" />
       <PackageReference Include="EFCore.NamingConventions" Version="5.0.2" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.11" />
@@ -18,8 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Include="Models\UserWall.cs" />
-      <Compile Include="Models\WorkerWall.cs" />
+      <Folder Include="Utils" />
     </ItemGroup>
 
 </Project>

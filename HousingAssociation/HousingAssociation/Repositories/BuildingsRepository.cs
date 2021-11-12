@@ -1,33 +1,34 @@
-﻿using HousingAssociation.DataAccess;
+﻿using System;
+using System.Threading.Tasks;
+using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace HousingAssociation.Repositories
 {
     public class BuildingsRepository
     {
-        private readonly AppDbContext _dbContext;
-
+        private readonly DbSet<Building> _buildings;
         public BuildingsRepository(AppDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _buildings = dbContext.Buildings;
         }
 
-        public int Add(Building building)
+        public async Task<Building> Add(Building building)
         {
-            _dbContext.Buildings.Add(building);
-            _dbContext.SaveChanges();
-            return building.Id;
+            await _buildings.AddAsync(building);// with { Address = address});
+            return building;
         }
 
-        public void Update(Building building)
-        {
-            var oldBuilding = _dbContext.Buildings.Find(building.Id);
-
-            if (oldBuilding is not null)
-            {
-                _dbContext.Buildings.Update(building with {Id = oldBuilding.Id});
-                _dbContext.SaveChanges();
-            }
-        }
+        // public void Update(Building building)
+        // {
+        //     var oldBuilding = _dbContext.Buildings.Find(building.Id);
+        //
+        //     if (oldBuilding is not null)
+        //     {
+        //         _dbContext.Buildings.Update(building with {Id = oldBuilding.Id});
+        //         _dbContext.SaveChanges();
+        //     }
+        // }
     }
 }

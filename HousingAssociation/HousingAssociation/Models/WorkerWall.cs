@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using HousingAssociation.DataAccess.Entities;
 
-namespace HousingAssociation.DataAccess.Entities
+namespace HousingAssociation.Models
 {
     public class WorkerWall
     {

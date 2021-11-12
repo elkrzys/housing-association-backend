@@ -2,6 +2,7 @@ using System.Xml.Serialization;
 using DataAccess.Settings;
 using HousingAssociation.DataAccess;
 using HousingAssociation.Repositories;
+using HousingAssociation.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -40,7 +41,11 @@ namespace HousingAssociation
                 options.UseNpgsql(dbSettings.ConnectionString)
             );
 
-            services.AddScoped<BuildingsRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            // services.AddScoped<AddressesRepository>();
+            // services.AddScoped<BuildingsRepository>();
+            services.AddScoped<BuildingsService>();
+            services.AddScoped<UsersService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
