@@ -16,16 +16,14 @@ namespace HousingAssociation.Repositories
             _credentials = dbContext.Credentials;
         }
 
-        public async Task<UserCredentials> Add(UserCredentials credentials)
+        public async Task Add(UserCredentials credentials)
         {
             var existingUserCredentials = await _credentials.FindAsync(credentials.UserId);
 
             if (existingUserCredentials is null)
             {
                 await _credentials.AddAsync(credentials);
-                return credentials;
             }
-            return null;
         }
 
         public async Task<UserCredentials> Update(UserCredentials credentials)

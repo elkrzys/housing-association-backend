@@ -12,7 +12,7 @@ namespace HousingAssociation.DataAccess.Entities
         [Required] [MaxLength(10)] public string PhoneNumber { get; set; }
         [Required] [MaxLength(255)] public string Email { get; set; }
         [Required] public Role Role { get; set; }
-        [Required] public bool IsEnabled { get; set; } = false;
+        [Required] public bool IsEnabled { get; set; }
         public List<Local> OwnedLocals { get; set; }
         public List<Local> ResidedLocals { get; set; }
         public UserCredentials UserCredentials { get; set; }

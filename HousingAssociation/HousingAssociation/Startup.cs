@@ -46,6 +46,7 @@ namespace HousingAssociation
             // services.AddScoped<BuildingsRepository>();
             services.AddScoped<BuildingsService>();
             services.AddScoped<UsersService>();
+            services.AddScoped<AuthenticationService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

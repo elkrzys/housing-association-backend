@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
 
@@ -13,25 +14,15 @@ namespace HousingAssociation.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<User> RegisterUser(User user, string password)
-        {
-            user = await _unitOfWork.UsersRepository.Add(user);
-            
-            var credentials = new UserCredentials
-            {
-                User = user,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password)
-            };
-            await _unitOfWork.UserCredentialsRepository.Add(credentials);
-            _unitOfWork.Commit();
+        public async Task<List<User>> FindUnconfirmedUsers() => await _unitOfWork.UsersRepository.FindAllNotEnabledUsers();
+        public async Task<User> FindUserById(int id) => await _unitOfWork.UsersRepository.FindById(id);
 
-            return user;
-        }
-        
-        public Task ConfirmUser()
+        public async Task<User> ConfirmUser(User user)
         {
-            // update user with his new role and isEnabled
-            return null;
+            await _unitOfWork.UsersRepository.Update(user with {IsEnabled = true});
+            _unitOfWork.Commit();
+            
+            return user;
         }
         
         public Task Update()
@@ -44,20 +35,6 @@ namespace HousingAssociation.Services
             return null;
         }
 
-        public Task Login()
-        {
-            // generate token
-            // generate refresh token
-            // add refresh token to db
-            // return jwt and set user as logged in
-            return null;
-        }
         
-        public Task Logout()
-        {
-            // delete refresh token from db
-            // logout user
-            return null;
-        }
     }
 }

@@ -16,13 +16,15 @@ namespace HousingAssociation.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly BuildingsService _buildingsService;
         private readonly UsersService _usersService;
+        private readonly AuthenticationService _authService;
         
-        public TestController(IUnitOfWork unitOfWork, BuildingsService buildingsService, UsersService usersService)
+        public TestController(IUnitOfWork unitOfWork, BuildingsService buildingsService, UsersService usersService, AuthenticationService authService)
         {
             //_buildingsRepository = buildingsRepository;
             _unitOfWork = unitOfWork;
             _buildingsService = buildingsService;
             _usersService = usersService;
+            _authService = authService;
         }
 
         [HttpGet]
@@ -38,13 +40,13 @@ namespace HousingAssociation.Controllers
             return Ok(added.Id);
         }
         
-        [HttpPost("register")]
-        public async Task<ActionResult<int>> RegisterUser(User user)
-        {
-            string password = "haselko";
-            user = await _usersService.RegisterUser(user, password);
-            return Ok(user.Id);
-        }
+        // [HttpPost("register")]
+        // public async Task<ActionResult<int>> RegisterUser(User user)
+        // {
+        //     string password = "haselko";
+        //     user = await _authService.RegisterUser(user, password);
+        //     return Ok(user.Id);
+        // }
         
         // [HttpPost("ech")]
         // public async Task<ActionResult<Address>> PostAddress(Address address)

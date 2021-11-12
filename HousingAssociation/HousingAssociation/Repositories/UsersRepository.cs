@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HousingAssociation.DataAccess;
@@ -30,19 +31,23 @@ namespace HousingAssociation.Repositories
             return null;
         }
 
-        public async Task<User> Update(User user)
+        public async Task Update(User user)
         {
             var existingUser = await _users.FindAsync(user.Id);
             if (existingUser is null)
             {
                 _users.Update(user);
             }
-            return null;
         }
 
         public async Task<User> FindById(int id)
         {
             return await _users.FindAsync(id);
+        }
+
+        public async Task<List<User>> FindAllNotEnabledUsers()
+        {
+            return await _users.Where(u => !u.IsEnabled).ToListAsync();
         }
     }
 }
