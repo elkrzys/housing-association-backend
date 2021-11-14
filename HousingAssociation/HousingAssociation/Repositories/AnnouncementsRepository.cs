@@ -29,6 +29,8 @@ namespace HousingAssociation.Repositories
 
         public void Delete(Announcement announcement) => _announcements.Remove(announcement);
 
+        public async Task<Announcement> FindById(int id) => await _announcements.FindAsync(id);
+
         public async Task<List<Announcement>> FindAll() => await _announcements.ToListAsync();
 
         public async Task<List<Announcement>> FindAllByTargetBuildingId(int buildingId) => await _announcements

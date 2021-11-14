@@ -2,6 +2,7 @@
 using HousingAssociation.Controllers.Requests;
 using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
+using HousingAssociation.ExceptionHandling.Exceptions;
 
 namespace HousingAssociation.Services
 {
@@ -14,9 +15,10 @@ namespace HousingAssociation.Services
             _unitOfWork = unitOfWork;
         }
         
-        public async Task<User> RegisterUser(RegisterRequest request)
+        public async Task<int> RegisterUser(RegisterRequest request)
         {
-            var user = new User()
+            //TODO: change user Role to selected one from request
+            var user = new User
             {
                 FirstName = request.FirstName,
                 LastName = request.LastName,
@@ -26,8 +28,8 @@ namespace HousingAssociation.Services
                 IsEnabled = false
             };
             
-            user = await _unitOfWork.UsersRepository.Add(user);
-            
+            user = await _unitOfWork.UsersRepository.AddIfNotExists(user) ?? throw new BadRequestException("User already exists!");
+
             var credentials = new UserCredentials
             {
                 User = user,
@@ -37,10 +39,11 @@ namespace HousingAssociation.Services
             await _unitOfWork.UserCredentialsRepository.Add(credentials);
             _unitOfWork.Commit();
 
-            return user;
+            //TODO: return result as JSONResult or something like this
+            return user.Id;
         }
         
-        public Task Login()
+        public Task Login(LoginRequest request)
         {
             // generate token
             // generate refresh token

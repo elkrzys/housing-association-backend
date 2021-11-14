@@ -10,16 +10,21 @@ namespace HousingAssociation.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly AuthenticationService _authService;
-
         public AuthenticationController(AuthenticationService authService)
         {
             _authService = authService;
         }
 
         [HttpPost("register")]
-        public async Task Register(RegisterRequest request)
+        public async Task<ActionResult<int>> Register(RegisterRequest request)
         {
-            await _authService.RegisterUser(request);
+            return await _authService.RegisterUser(request);
+        }
+        
+        [HttpPost("login")]
+        public async Task Login(LoginRequest request)
+        {
+            await _authService.Login(request);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Xml.Serialization;
 using DataAccess.Settings;
 using HousingAssociation.DataAccess;
+using HousingAssociation.ExceptionHandling;
 using HousingAssociation.Repositories;
 using HousingAssociation.Services;
 using Microsoft.AspNetCore.Builder;
@@ -36,14 +37,15 @@ namespace HousingAssociation
             
             services.AddSwaggerGen();
 
+            // Database configuration
             var dbSettings = Configuration.GetSection(nameof(DbSettings)).Get<DbSettings>();
             services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(dbSettings.ConnectionString)
             );
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            // services.AddScoped<AddressesRepository>();
-            // services.AddScoped<BuildingsRepository>();
+            
+            // Services
             services.AddScoped<BuildingsService>();
             services.AddScoped<UsersService>();
             services.AddScoped<AuthenticationService>();
@@ -61,7 +63,8 @@ namespace HousingAssociation
                     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Housing Association v1"));
                 }
             }
-
+            
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
             app.UseRouting();
 
             app.UseEndpoints(endpoints => endpoints.MapControllers());

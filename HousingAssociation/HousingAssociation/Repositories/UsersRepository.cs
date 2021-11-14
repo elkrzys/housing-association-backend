@@ -17,7 +17,7 @@ namespace HousingAssociation.Repositories
             _users = dbContext.Users;
         }
 
-        public async Task<User> Add(User user)
+        public async Task<User> AddIfNotExists(User user)
         {
             var existingUser = await _users.FirstOrDefaultAsync(u =>
                 u.FirstName.Equals(user.FirstName) && u.LastName.Equals(user.LastName) && u.Email.Equals(user.Email) &&

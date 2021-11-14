@@ -12,6 +12,7 @@ namespace HousingAssociation.DataAccess
         UserCredentialsRepository UserCredentialsRepository { get; }
         RefreshTokensRepository RefreshTokensRepository { get; }
         AnnouncementsRepository AnnouncementsRepository { get; }
+        IssuesRepository IssuesRepository { get; }
         void Commit();
     }
 }

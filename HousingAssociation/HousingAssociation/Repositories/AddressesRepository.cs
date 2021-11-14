@@ -33,5 +33,10 @@ namespace HousingAssociation.Repositories
             }
             return existingAddress;
         }
+
+        public void Delete(Address address)
+        {
+            _addresses.Remove(address);
+        }
     }
 }
