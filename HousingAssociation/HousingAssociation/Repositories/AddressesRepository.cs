@@ -28,12 +28,19 @@ namespace HousingAssociation.Repositories
             if (existingAddress is null)
             {
                 await _addresses.AddAsync(address);
-                //await _dbContext.SaveChangesAsync();
                 return address;
             }
             return existingAddress;
         }
 
+        public async Task Add(Address address) =>  await _addresses.AddAsync(address);
+
+        public async Task<Address> FindByIdAsync(int id) => await _addresses.FindAsync(id);
+        
+        public async Task<Address> FindAddressAsync(Address address) => await _addresses.FirstOrDefaultAsync(a => a.City.Equals(address.City) 
+                                                                            && a.District.Equals(address.District) 
+                                                                            && a.Street.Equals(address.Street));
+        
         public void Delete(Address address)
         {
             _addresses.Remove(address);

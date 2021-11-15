@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HousingAssociation.DataAccess;
@@ -16,7 +15,12 @@ namespace HousingAssociation.Repositories
         {
             _users = dbContext.Users;
         }
-
+        public async Task<User> FindByUserEmailAsync(string email) =>
+            await _users
+                .AsQueryable()
+                .Include(u => u.RefreshTokens)
+                .SingleOrDefaultAsync(u => u.Email.Equals(email));
+        
         public async Task<User> AddIfNotExists(User user)
         {
             var existingUser = await _users.FirstOrDefaultAsync(u =>
@@ -49,5 +53,11 @@ namespace HousingAssociation.Repositories
         {
             return await _users.Where(u => !u.IsEnabled).ToListAsync();
         }
+
+        public async Task<User> FindByRefreshToken(string token) 
+            => await _users
+                .Include(u => u.RefreshTokens)
+                .SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
+        
     }
 }

@@ -17,7 +17,7 @@ namespace HousingAssociation.Repositories
             _locals = dbContext.Locals;
         }
         
-        public async Task<Local> AddOrReturnExisting(Local local)
+        public async Task<Local> AddIfNotExistAsync(Local local)
         {
             var existingLocal =
                 await _locals.FirstOrDefaultAsync(l => l.Number == local.Number && l.BuildingId == local.BuildingId);
@@ -27,11 +27,10 @@ namespace HousingAssociation.Repositories
                 await _locals.AddAsync(local);
                 return local;
             }
-
-            return existingLocal;
+            return null;
         }
 
-        public async Task<IQueryable<Local>> AddRange(List<Local> locals)
+        public async Task<IQueryable<Local>> AddRangeIfNotExistsAsync(List<Local> locals)
         {
             await _locals.AddRangeAsync(locals);
             return locals.AsQueryable();
@@ -51,10 +50,7 @@ namespace HousingAssociation.Repositories
             return local;
         }
 
-        public async Task<IQueryable<Local>> GetAllByBuildingId(int buildingId)
-        {
-            var locals = await _locals.Where(local => local.BuildingId == buildingId).ToListAsync();
-            return locals.AsQueryable();
-        }
+        public async Task<List<Local>> GetAllByBuildingIdAsync(int buildingId)
+            => await _locals.Where(local => local.BuildingId == buildingId).ToListAsync();
     }
 }

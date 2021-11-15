@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
@@ -14,21 +14,22 @@ namespace HousingAssociation.Repositories
             _buildings = dbContext.Buildings;
         }
 
-        public async Task<Building> Add(Building building)
+        public async Task<Building> FindByIdAsync(int id) => await _buildings.FindAsync(id);
+
+        public async Task<Building> FindByIdWithLocalsAsync(int id)
+            => await _buildings
+                .Include(b => b.Locals)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+        public async Task<Building> AddAsync(Building building)
         {
-            await _buildings.AddAsync(building);// with { Address = address});
+            await _buildings.AddAsync(building);
             return building;
         }
 
-        // public void Update(Building building)
-        // {
-        //     var oldBuilding = _dbContext.Buildings.Find(building.Id);
-        //
-        //     if (oldBuilding is not null)
-        //     {
-        //         _dbContext.Buildings.Update(building with {Id = oldBuilding.Id});
-        //         _dbContext.SaveChanges();
-        //     }
-        // }
+        public async Task<List<Building>> FindAllByAddressAsync(Address address) 
+            => await _buildings.Include(b => b.Address == address).ToListAsync();
+
+        
     }
 }

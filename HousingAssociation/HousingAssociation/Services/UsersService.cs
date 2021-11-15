@@ -16,7 +16,6 @@ namespace HousingAssociation.Services
 
         public async Task<List<User>> FindUnconfirmedUsers() => await _unitOfWork.UsersRepository.FindAllNotEnabledUsers();
         public async Task<User> FindUserById(int id) => await _unitOfWork.UsersRepository.FindById(id);
-
         public async Task<User> ConfirmUser(User user)
         {
             await _unitOfWork.UsersRepository.Update(user with {IsEnabled = true});

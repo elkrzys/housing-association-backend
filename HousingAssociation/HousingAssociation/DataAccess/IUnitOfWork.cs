@@ -8,6 +8,7 @@ namespace HousingAssociation.DataAccess
         AppDbContext Context { get;  } 
         AddressesRepository AddressesRepository { get; }
         BuildingsRepository BuildingsRepository { get; }
+        LocalsRepository LocalsRepository { get; }
         UsersRepository UsersRepository { get; }
         UserCredentialsRepository UserCredentialsRepository { get; }
         RefreshTokensRepository RefreshTokensRepository { get; }

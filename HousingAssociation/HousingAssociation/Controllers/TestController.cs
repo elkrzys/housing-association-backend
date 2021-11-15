@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
-using HousingAssociation.Repositories;
 using HousingAssociation.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HousingAssociation.Controllers
@@ -20,15 +20,22 @@ namespace HousingAssociation.Controllers
         
         public TestController(IUnitOfWork unitOfWork, BuildingsService buildingsService, UsersService usersService, AuthenticationService authService)
         {
-            //_buildingsRepository = buildingsRepository;
             _unitOfWork = unitOfWork;
             _buildingsService = buildingsService;
             _usersService = usersService;
             _authService = authService;
         }
 
-        [HttpGet]
-        public ActionResult<DateTime> GetCurrentDate()
+        [HttpGet("test-resident")]
+        [Authorize(Roles = "Resident")]
+        public ActionResult<DateTime> TestResidentRole()
+        {
+            return DateTime.Now;
+        }
+        
+        [HttpGet("test-worker")]
+        [Authorize(Roles = "Worker")]
+        public ActionResult<DateTime> TestWorkerRole()
         {
             return DateTime.Now;
         }
@@ -39,24 +46,5 @@ namespace HousingAssociation.Controllers
             var added = await _buildingsService.AddBuildingWithAddress(building);
             return Ok(added.Id);
         }
-        
-        // [HttpPost("register")]
-        // public async Task<ActionResult<int>> RegisterUser(User user)
-        // {
-        //     string password = "haselko";
-        //     user = await _authService.RegisterUser(user, password);
-        //     return Ok(user.Id);
-        // }
-        
-        // [HttpPost("ech")]
-        // public async Task<ActionResult<Address>> PostAddress(Address address)
-        // {
-        //     //var id = await _unitOfWork.Addresses.AddNewAddressOrReturnExisting(address);
-        //     var adr = await _buildingsService.AddNewOrReturnExisting(address);
-        //     
-        //     return Ok(adr);
-        // }
-        
-        
     }
 }

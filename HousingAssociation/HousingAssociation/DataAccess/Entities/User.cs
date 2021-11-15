@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection.Metadata.Ecma335;
+using System.Text.Json.Serialization;
 
 namespace HousingAssociation.DataAccess.Entities
 {
@@ -16,6 +17,8 @@ namespace HousingAssociation.DataAccess.Entities
         public List<Local> OwnedLocals { get; set; }
         public List<Local> ResidedLocals { get; set; }
         public UserCredentials UserCredentials { get; set; }
+        
+        [JsonIgnore] public List<RefreshToken> RefreshTokens { get; set; }
         public List<Document> Documents { get; set; }
         public Document Document { get; set; }
         public Issue Issue { get; set; }

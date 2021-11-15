@@ -55,6 +55,7 @@ namespace HousingAssociation.ExceptionHandling
                         break;
                     default:
                         //Log.Error(exception, $"{ exception.Message } at { exception.Source }.");
+                        throw exception;
                         context.Response.ContentType = "application/json";
                         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                         await context.Response.WriteAsJsonAsync(new

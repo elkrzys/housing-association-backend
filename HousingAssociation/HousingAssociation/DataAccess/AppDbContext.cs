@@ -15,7 +15,7 @@ namespace HousingAssociation.DataAccess
         public virtual DbSet<Address> Addresses { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserCredentials> Credentials { get; set; }
-        public virtual DbSet<UserRefreshToken> RefreshTokens { get; set; }
+        public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
         public virtual DbSet<Building> Buildings { get; set; }
         public virtual DbSet<Local> Locals { get; set; }
         public virtual DbSet<Announcement> Announcements { get; set; }
