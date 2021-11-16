@@ -21,7 +21,7 @@ namespace HousingAssociation.Services
 
             if (locals.Count == 1)
             {
-                await _unitOfWork.LocalsRepository.AddIfNotExistAsync(locals.First());
+                await _unitOfWork.LocalsRepository.AddIfNotExistsAsync(locals.First());
             }
             else
             {

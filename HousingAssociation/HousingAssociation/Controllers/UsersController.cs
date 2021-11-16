@@ -23,5 +23,8 @@ namespace HousingAssociation.Controllers
             return Ok(await _usersService.FindUnconfirmedUsers());
         }
         
+        
+        //publi async Task<IActionResult> Update(int id, User user)
+        
     }
 }

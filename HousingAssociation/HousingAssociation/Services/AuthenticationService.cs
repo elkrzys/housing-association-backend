@@ -25,7 +25,7 @@ namespace HousingAssociation.Services
             _jwtConfig = jwtConfig;
         }
         
-        public async Task<int> RegisterUser(RegisterRequest request)
+        public async Task<User> RegisterUser(RegisterRequest request)
         {
             //TODO: change user Role to selected one from request
             var user = new User
@@ -50,7 +50,7 @@ namespace HousingAssociation.Services
             _unitOfWork.Commit();
 
             //TODO: return result as JSONResult or something like this
-            return user.Id;
+            return user;
         }
         
         public async Task<LoginResponse> Login(LoginRequest request)

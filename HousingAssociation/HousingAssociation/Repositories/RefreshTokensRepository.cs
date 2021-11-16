@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HousingAssociation.Repositories
 {
+    //TODO: Remove this class and related DbSet - tokens are used only in UserRepository.
     public class RefreshTokensRepository
     {
         private readonly DbSet<RefreshToken> _tokens;

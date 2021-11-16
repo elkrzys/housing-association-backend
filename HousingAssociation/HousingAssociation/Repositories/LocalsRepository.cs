@@ -17,7 +17,7 @@ namespace HousingAssociation.Repositories
             _locals = dbContext.Locals;
         }
         
-        public async Task<Local> AddIfNotExistAsync(Local local)
+        public async Task<Local> AddIfNotExistsAsync(Local local)
         {
             var existingLocal =
                 await _locals.FirstOrDefaultAsync(l => l.Number == local.Number && l.BuildingId == local.BuildingId);
