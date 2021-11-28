@@ -13,7 +13,6 @@ namespace HousingAssociation.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UsersService _usersService;
-
         public UsersController(UsersService usersService)
         {
             _usersService = usersService;

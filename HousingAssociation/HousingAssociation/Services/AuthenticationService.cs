@@ -7,8 +7,6 @@ using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.ExceptionHandling.Exceptions;
 using HousingAssociation.Utils.Jwt.JwtUtils;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 
 namespace HousingAssociation.Services
 {
@@ -78,13 +76,14 @@ namespace HousingAssociation.Services
 
             return new LoginResponse(user, jwtToken, refreshToken.Token);
         }
-        
-        public Task Logout()
+
+        public async Task ResetPassword(ResetPasswordRequest request)
         {
-            // delete refresh token from db
-            // logout user
-            
-            return null;
+            var user = await _unitOfWork.UsersRepository.FindByUserEmailAsync(request.Email);
+            if (user is null || !user.PhoneNumber.Equals(request.PhoneNumber))
+                throw new NotFoundException();
+            user.UserCredentials.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            _unitOfWork.Commit();
         }
         
         public async Task<LoginResponse> RefreshToken(string token)

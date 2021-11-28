@@ -26,16 +26,11 @@ namespace HousingAssociation.Repositories
             }
         }
 
-        public async Task<UserCredentials> Update(UserCredentials credentials)
+        public void Update(UserCredentials credentials)
         {
-            var existingUserCredentials = await _credentials.FindAsync(credentials.UserId);
-            if (existingUserCredentials is null)
-            {
-                _credentials.Update(credentials);
-            }
-            return null;
+            _credentials.Update(credentials);
         }
-        
+
         public async Task<UserCredentials> FindByUserId(int userId)
         {
             return await _credentials.FindAsync(userId);

@@ -51,6 +51,8 @@ namespace HousingAssociation.Services
                 Role = Role.Worker,
                 IsEnabled = false
             };
+            
+            // generate worker credentials
             user = await _unitOfWork.UsersRepository.AddIfNotExists(user);
         }
         

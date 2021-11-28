@@ -17,8 +17,8 @@ namespace HousingAssociation.Repositories
         }
         public async Task<User> FindByUserEmailAsync(string email) =>
             await _users
-                .AsQueryable()
                 .Include(u => u.RefreshTokens)
+                .Include(u => u.UserCredentials)
                 .SingleOrDefaultAsync(u => u.Email.Equals(email));
         
         public async Task<User> AddIfNotExists(User user)

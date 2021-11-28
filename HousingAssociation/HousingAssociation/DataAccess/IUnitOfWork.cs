@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using HousingAssociation.Repositories;
 
 namespace HousingAssociation.DataAccess
@@ -15,5 +16,6 @@ namespace HousingAssociation.DataAccess
         AnnouncementsRepository AnnouncementsRepository { get; }
         IssuesRepository IssuesRepository { get; }
         void Commit();
+        Task CommitAsync();
     }
 }

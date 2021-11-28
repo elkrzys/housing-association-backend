@@ -20,7 +20,6 @@ namespace HousingAssociation.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequest request)
         {
-            var i = 10;
             return Ok(await _authService.RegisterUser(request));
         }
         
@@ -30,6 +29,13 @@ namespace HousingAssociation.Controllers
             var loginResponse = await _authService.Login(request);
             SetRefreshTokenCookie(loginResponse.RefreshToken);
             return Ok(loginResponse);
+        }
+        
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
+        {
+            await _authService.ResetPassword(request);
+            return Ok();
         }
 
         [HttpPost("refresh-token")]

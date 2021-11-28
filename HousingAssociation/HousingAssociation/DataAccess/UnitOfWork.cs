@@ -1,4 +1,5 @@
-﻿using HousingAssociation.Repositories;
+﻿using System.Threading.Tasks;
+using HousingAssociation.Repositories;
 
 namespace HousingAssociation.DataAccess
 {
@@ -14,6 +15,11 @@ namespace HousingAssociation.DataAccess
         public void Commit()
         {
             Context.SaveChanges();
+        }
+
+        public async Task CommitAsync()
+        {
+            await Context.SaveChangesAsync();
         }
 
         public void Dispose()
