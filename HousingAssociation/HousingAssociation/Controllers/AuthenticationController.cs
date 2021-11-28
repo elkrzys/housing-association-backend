@@ -20,6 +20,7 @@ namespace HousingAssociation.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequest request)
         {
+            var i = 10;
             return Ok(await _authService.RegisterUser(request));
         }
         

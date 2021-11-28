@@ -58,6 +58,8 @@ namespace HousingAssociation.Repositories
             => await _users
                 .Include(u => u.RefreshTokens)
                 .SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
-        
+
+        public void Delete(User user) => _users.Remove(user);
+
     }
 }
