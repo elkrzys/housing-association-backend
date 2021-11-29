@@ -23,8 +23,8 @@ namespace HousingAssociation.DataAccess
         public virtual DbSet<Document> Documents { get; set; }
         //public virtual DbSet<AnnouncementBuilding> AnnouncementBuildings { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseSnakeCaseNamingConvention().UseEnumCheckConstraints();
+        // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //     => optionsBuilder.UseSnakeCaseNamingConvention().UseEnumCheckConstraints();
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

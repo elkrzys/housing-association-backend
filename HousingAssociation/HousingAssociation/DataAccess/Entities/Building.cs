@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
 
 namespace HousingAssociation.DataAccess.Entities
 {
@@ -10,7 +11,7 @@ namespace HousingAssociation.DataAccess.Entities
         [Required] public Address Address { get; set; }
         [Required] public BuildingType Type { get; set; }
         
-        public List<Local> Locals { get; set; }
-        public List<Announcement> Announcements { get; set; }
+        [JsonIgnore] public List<Local> Locals { get; set; }
+        [JsonIgnore] public List<Announcement> Announcements { get; set; }
     }
 }

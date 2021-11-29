@@ -71,6 +71,14 @@ namespace HousingAssociation.Services
             });
             _unitOfWork.Commit();
         }
+
+        public async Task ChangePassword(int userId, string newPassword)
+        {
+            var credentials = await _unitOfWork.UserCredentialsRepository.FindByUserId(userId);
+            if (credentials is null)
+                throw new BadRequestException("User doesn't exist");
+            _unitOfWork.UserCredentialsRepository.Update(credentials with {PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword)});
+        }
         
         public async Task DeleteUser(int id)
         {

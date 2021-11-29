@@ -32,7 +32,6 @@ namespace HousingAssociation.DataAccess
         private LocalsRepository _localsRepository;
         private UsersRepository _usersRepository;
         private UserCredentialsRepository _usersCredentialsRepository;
-        private RefreshTokensRepository _refreshTokensRepository;
         private AnnouncementsRepository _announcementsRepository;
         private IssuesRepository _issuesRepository;
         public AddressesRepository AddressesRepository => _addressesRepository ??= new AddressesRepository(Context);
@@ -40,7 +39,6 @@ namespace HousingAssociation.DataAccess
         public LocalsRepository LocalsRepository => _localsRepository ??= new LocalsRepository(Context);
         public UsersRepository UsersRepository => _usersRepository ??= new UsersRepository(Context);
         public UserCredentialsRepository UserCredentialsRepository => _usersCredentialsRepository ??= new UserCredentialsRepository(Context);
-        public RefreshTokensRepository RefreshTokensRepository => _refreshTokensRepository ??= new RefreshTokensRepository(Context);
         public AnnouncementsRepository AnnouncementsRepository => _announcementsRepository ??= new AnnouncementsRepository(Context);
         public IssuesRepository IssuesRepository => _issuesRepository ??= new IssuesRepository(Context);
     }

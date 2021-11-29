@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
@@ -22,7 +23,7 @@ namespace HousingAssociation
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
@@ -82,6 +83,8 @@ namespace HousingAssociation
             var dbSettings = Configuration.GetSection(nameof(DbSettings)).Get<DbSettings>();
             services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(dbSettings.ConnectionString)
+                    .UseSnakeCaseNamingConvention()
+                    .UseEnumCheckConstraints()
             );
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -90,6 +93,7 @@ namespace HousingAssociation
             services.AddScoped<BuildingsService>();
             services.AddScoped<LocalsService>();
             services.AddScoped<UsersService>();
+            services.AddScoped<AnnouncementsService>();
             services.AddScoped<AuthenticationService>();
 
         }

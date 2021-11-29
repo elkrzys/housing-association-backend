@@ -11,44 +11,26 @@ namespace HousingAssociation.Repositories
     public class LocalsRepository
     {
         private readonly DbSet<Local> _locals;
-        
         public LocalsRepository(AppDbContext dbContext)
         {
             _locals = dbContext.Locals;
         }
+        public async Task<Local> FindByIdAsync(int id) => await _locals.FindAsync(id);
         
         public async Task<Local> AddIfNotExistsAsync(Local local)
         {
             var existingLocal =
                 await _locals.FirstOrDefaultAsync(l => l.Number == local.Number && l.BuildingId == local.BuildingId);
 
-            if (existingLocal is null)
-            {
-                await _locals.AddAsync(local);
-                return local;
-            }
-            return null;
-        }
-
-        public async Task<IQueryable<Local>> AddRangeIfNotExistsAsync(List<Local> locals)
-        {
-            await _locals.AddRangeAsync(locals);
-            return locals.AsQueryable();
-        }
-
-        public async Task<Local> Update(Local local)
-        {
-            // var existingLocal =  await _locals.FirstOrDefaultAsync(l => l.Number == local.Number && l.BuildingId == local.BuildingId);
-            var existingLocal = await _locals.FindAsync(local.Id);
-
-            if (existingLocal is null)
-            {
-                return null;
-            }
-
-            _locals.Update(local);
+            if (existingLocal is not null) return null;
+            
+            await _locals.AddAsync(local);
             return local;
         }
+
+        public void Update(Local local) => _locals.Update(local);
+
+        public void Delete(Local local) => _locals.Remove(local);
 
         public async Task<List<Local>> GetAllByBuildingIdAsync(int buildingId)
             => await _locals.Where(local => local.BuildingId == buildingId).ToListAsync();

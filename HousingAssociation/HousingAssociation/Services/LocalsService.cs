@@ -15,30 +15,44 @@ namespace HousingAssociation.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Local> AddLocals(List<Local> locals)
+        public async Task AddLocals(List<Local> locals)
         {
             if (!locals.Any()) throw new BadRequestException("Cannot add empty list of locals.");
-
-            if (locals.Count == 1)
-            {
-                await _unitOfWork.LocalsRepository.AddIfNotExistsAsync(locals.First());
-            }
-            else
-            {
-               // await _unitOfWork.LocalsRepository.AddRange(locals);
-            }
+            locals.ForEach(async local => await AddLocalOrThrowBadRequestIfAlreadyExists(local));
             _unitOfWork.Commit();
-            return null;
         }
 
         public async Task<List<Local>> FindAllFromBuilding(int buildingId)
         {
-            var building = await _unitOfWork.BuildingsRepository.FindByIdAsync(buildingId) 
-                           ?? throw new BadRequestException("Building doesn't exists.");
+            if(await _unitOfWork.BuildingsRepository.FindByIdAsync(buildingId) is null)
+                throw new BadRequestException("Building doesn't exists.");
 
-            return building.Locals;
+            return await _unitOfWork.LocalsRepository.GetAllByBuildingIdAsync(buildingId);
+        }
 
-            //return await _unitOfWork.LocalsRepository.GetAllByBuildingIdAsync(buildingId);
+        public async Task UpdateLocal(Local local)
+        {
+            if (await _unitOfWork.LocalsRepository.FindByIdAsync(local.Id) is null)
+                throw new BadRequestException("Local doesn't exist");
+
+            _unitOfWork.LocalsRepository.Update(local);
+            _unitOfWork.Commit();
+        }
+
+        public async Task DeleteLocalById(int id)
+        {
+            var local = await _unitOfWork.LocalsRepository.FindByIdAsync(id);
+            if(local is null)
+                throw new BadRequestException("Local doesn't exist");
+            
+            _unitOfWork.LocalsRepository.Delete(local);
+        }
+
+        private async Task AddLocalOrThrowBadRequestIfAlreadyExists(Local local)
+        {
+            local = await _unitOfWork.LocalsRepository.AddIfNotExistsAsync(local);
+            if(local is null)
+                throw new BadRequestException("At least one added local already exists");
         }
     }
 }

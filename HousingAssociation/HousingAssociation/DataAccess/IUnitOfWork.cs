@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using HousingAssociation.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace HousingAssociation.DataAccess
 {
@@ -12,7 +13,6 @@ namespace HousingAssociation.DataAccess
         LocalsRepository LocalsRepository { get; }
         UsersRepository UsersRepository { get; }
         UserCredentialsRepository UserCredentialsRepository { get; }
-        RefreshTokensRepository RefreshTokensRepository { get; }
         AnnouncementsRepository AnnouncementsRepository { get; }
         IssuesRepository IssuesRepository { get; }
         void Commit();
