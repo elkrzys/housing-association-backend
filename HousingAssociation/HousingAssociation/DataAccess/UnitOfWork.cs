@@ -33,6 +33,7 @@ namespace HousingAssociation.DataAccess
         private UsersRepository _usersRepository;
         private UserCredentialsRepository _usersCredentialsRepository;
         private AnnouncementsRepository _announcementsRepository;
+        private DocumentsRepository _documentsRepository;
         private IssuesRepository _issuesRepository;
         public AddressesRepository AddressesRepository => _addressesRepository ??= new AddressesRepository(Context);
         public BuildingsRepository BuildingsRepository => _buildingsRepository ??= new BuildingsRepository(Context);
@@ -40,6 +41,7 @@ namespace HousingAssociation.DataAccess
         public UsersRepository UsersRepository => _usersRepository ??= new UsersRepository(Context);
         public UserCredentialsRepository UserCredentialsRepository => _usersCredentialsRepository ??= new UserCredentialsRepository(Context);
         public AnnouncementsRepository AnnouncementsRepository => _announcementsRepository ??= new AnnouncementsRepository(Context);
+        public DocumentsRepository DocumentsRepository => _documentsRepository ??= new DocumentsRepository(Context);
         public IssuesRepository IssuesRepository => _issuesRepository ??= new IssuesRepository(Context);
     }
 }

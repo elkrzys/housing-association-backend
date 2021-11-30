@@ -14,6 +14,7 @@ namespace HousingAssociation.DataAccess
         UsersRepository UsersRepository { get; }
         UserCredentialsRepository UserCredentialsRepository { get; }
         AnnouncementsRepository AnnouncementsRepository { get; }
+        DocumentsRepository DocumentsRepository { get; }
         IssuesRepository IssuesRepository { get; }
         void Commit();
         Task CommitAsync();

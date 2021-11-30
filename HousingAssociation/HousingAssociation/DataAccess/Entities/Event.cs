@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
 namespace HousingAssociation.DataAccess.Entities
 {
@@ -13,6 +14,6 @@ namespace HousingAssociation.DataAccess.Entities
         [Required][ForeignKey(nameof(User))] public int AuthorId { get; set; }
         [Required] public DateTime CreatedAt { get; set; }
 
-        public User Author { get; set; }
+        [JsonIgnore] public User Author { get; set; }
     }
 }

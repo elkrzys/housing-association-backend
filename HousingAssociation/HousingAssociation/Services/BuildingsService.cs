@@ -22,16 +22,9 @@ namespace HousingAssociation.Services
 
             return building;
         }
-        public async Task<List<Building>> GetAllBuildingsByAddress(Address address)
-        {
-            var existingAddress = await _unitOfWork.AddressesRepository.FindAddressAsync(address);
-            if (existingAddress is not null)
-            {
-                return await _unitOfWork.BuildingsRepository.FindAllByExistingAddressAsync(existingAddress);
-            }
-            return await _unitOfWork.BuildingsRepository.FindByNotCompleteAddress(address);
-        }
-
+        public async Task<List<Building>> GetAllBuildingsByAddress(Address address) 
+            => await _unitOfWork.BuildingsRepository.FindByAddressAsync(address);
+        
         public async Task Update(Building building)
         {
             if (await _unitOfWork.BuildingsRepository.FindByIdAsync(building.Id) is null)

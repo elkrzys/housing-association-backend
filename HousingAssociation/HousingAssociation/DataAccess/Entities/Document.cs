@@ -14,11 +14,6 @@ namespace HousingAssociation.DataAccess.Entities
         public int AuthorId { get; set; }
         public User Author { get; set; }
         public List<User> Receivers { get; set; }
-        
-        
-        
-        
-        
         [Required] public DateTime CreatedAt { get; set; }
         [Required] public string Filepath { get; set; }
         public int? DaysToExpire { get; set; }
