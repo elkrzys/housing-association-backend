@@ -16,6 +16,7 @@ namespace HousingAssociation.DataAccess.Entities
         public List<User> Receivers { get; set; }
         [Required] public DateTime CreatedAt { get; set; }
         [Required] public string Filepath { get; set; }
+        [Required] public string Md5 { get; set; }
         public int? DaysToExpire { get; set; }
         public DateTime? RemovesAt
         {

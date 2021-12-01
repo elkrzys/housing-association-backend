@@ -18,5 +18,15 @@ namespace HousingAssociation.Utils.Extensions
                 IsEnabled = user.IsEnabled
             };
         
+        public static DocumentDto AsDto(this Document document) 
+            => new DocumentDto
+            {
+                Id = document.Id,
+                Title = document.Title,
+                AuthorId = document.AuthorId,
+                CreatedAt = document.CreatedAt,
+                RemovesAt = document.RemovesAt
+            };
+        
     }
 }

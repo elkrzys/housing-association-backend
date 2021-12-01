@@ -27,7 +27,7 @@ namespace HousingAssociation.Services
             users.ForEach(u => usersDtos.Add(u.AsDto()));
             return usersDtos;
         }
-        public async Task<User> FindUserById(int id) => await _unitOfWork.UsersRepository.FindById(id);
+        public async Task<UserDto> FindUserById(int id) => (await _unitOfWork.UsersRepository.FindById(id)).AsDto();
         public async Task<UserDto> ConfirmUser(int id)
         {
             var user = await _unitOfWork.UsersRepository.FindById(id);

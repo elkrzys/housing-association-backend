@@ -37,7 +37,8 @@ namespace HousingAssociation.Repositories
                 .Include(d => d.Receivers)
                 .SingleAsync(d => d.Id == id))
                 .Receivers;
-
+        public async Task<List<string>> FindAllDocumentHashes()
+            => await _documents.Select(d => d.Md5).ToListAsync();
         public void DeleteDocument(Document document) => _documents.Remove(document);
 
     }
