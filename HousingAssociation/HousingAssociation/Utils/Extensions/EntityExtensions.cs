@@ -25,7 +25,8 @@ namespace HousingAssociation.Utils.Extensions
                 Title = document.Title,
                 AuthorId = document.AuthorId,
                 CreatedAt = document.CreatedAt,
-                RemovesAt = document.RemovesAt
+                RemovesAt = document.RemovesAt,
+                FilePath = document.Filepath
             };
         
     }

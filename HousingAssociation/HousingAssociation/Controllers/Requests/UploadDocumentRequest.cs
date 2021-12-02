@@ -9,7 +9,7 @@ namespace HousingAssociation.Controllers.Requests
         [Required] public int AuthorId { get; set; }
         [Required] public string Title { get; set; }
         [Required] public List<int> ReceiversIds { get; set; }
-        [Required] public IFormFile Document { get; set; }
+        [Required] public IFormFile DocumentFile { get; set; }
         public int? DaysToExpire { get; set; }
     }
 }

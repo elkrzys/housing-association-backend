@@ -9,6 +9,7 @@ using HousingAssociation.ExceptionHandling.Exceptions;
 using HousingAssociation.Models.DTOs;
 using HousingAssociation.Utils;
 using HousingAssociation.Utils.Extensions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 
 namespace HousingAssociation.Services
@@ -16,10 +17,12 @@ namespace HousingAssociation.Services
     public class DocumentsService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public DocumentsService(IUnitOfWork unitOfWork)
+        public DocumentsService(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<DocumentDto> FindById(int id)
@@ -42,11 +45,11 @@ namespace HousingAssociation.Services
 
         public async Task AddNewDocument(UploadDocumentRequest request)
         {
-            CheckIfDocumentFileIsValidOrThrowBadRequest(request.Document);
-            var documentMd5 = await GetMd5IfDocumentNotExists(request.Document);
+            CheckIfDocumentFileIsValidOrThrowBadRequest(request.DocumentFile);
+            var documentMd5 = await GetMd5IfDocumentNotExists(request.DocumentFile);
             var documentReceivers = await GetReceiversByIds(request.ReceiversIds);
-
-            // TODO: ADD FILEPATH
+            var path = await SaveFileAndReturnPath(request.DocumentFile);
+            
             var document = new Document
             {
                 Title = request.Title,
@@ -55,12 +58,10 @@ namespace HousingAssociation.Services
                 CreatedAt = DateTime.Now,
                 DaysToExpire = request.DaysToExpire,
                 Md5 = documentMd5,
-                Filepath = "FILEPATH"
+                Filepath = path
             };
             await _unitOfWork.DocumentsRepository.AddAsync(document);
             _unitOfWork.Commit();
-            
-            // TODO: save on server filesystem
         }
 
         private void CheckIfDocumentFileIsValidOrThrowBadRequest(IFormFile documentFile)
@@ -108,6 +109,18 @@ namespace HousingAssociation.Services
             ids.ForEach(async id => receivers.Add(await _unitOfWork.UsersRepository.FindById(id)));
             return receivers;
         }
-        
+
+        private async Task<string> SaveFileAndReturnPath(IFormFile documentFile)
+        {
+            var randomFileName = Path.GetRandomFileName();
+            var extension = Path.GetExtension(documentFile.FileName);
+            var path = Path.Combine(_webHostEnvironment.WebRootPath, "documents", randomFileName + extension);
+            
+            await using var fileStream = new FileStream(path, FileMode.Create);
+            await documentFile.CopyToAsync(fileStream);
+            
+            return path;
+        }
+
     }
 }

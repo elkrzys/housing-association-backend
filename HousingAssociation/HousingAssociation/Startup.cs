@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Text;
 using System.Xml.Serialization;
 using DataAccess.Settings;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -111,6 +113,20 @@ namespace HousingAssociation
                 }
             }
             
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(env.WebRootPath, "documents")),
+                RequestPath = "/documents"
+            });
+            
+            // app.UseDirectoryBrowser(new DirectoryBrowserOptions
+            // {
+            //     FileProvider = new PhysicalFileProvider(
+            //         Path.Combine(env.WebRootPath, "documents")),
+            //     RequestPath = "/documents"
+            // });
+
             app.UseCors(x => x
                 .SetIsOriginAllowed(origin => true)
                 .AllowAnyMethod()
