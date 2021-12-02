@@ -95,6 +95,7 @@ namespace HousingAssociation
             services.AddScoped<BuildingsService>();
             services.AddScoped<LocalsService>();
             services.AddScoped<UsersService>();
+            services.AddScoped<DocumentsService>();
             services.AddScoped<AnnouncementsService>();
             services.AddScoped<AuthenticationService>();
 

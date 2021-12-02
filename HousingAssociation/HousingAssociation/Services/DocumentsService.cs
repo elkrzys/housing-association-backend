@@ -122,5 +122,17 @@ namespace HousingAssociation.Services
             return path;
         }
 
+        public async Task DeleteById(int id)
+        {
+            var document = await _unitOfWork.DocumentsRepository.FindByIdAsync(id) ?? throw new NotFoundException();
+            var path = document.Filepath;
+            
+            _unitOfWork.DocumentsRepository.DeleteDocument(document);
+            _unitOfWork.Commit();
+            
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+
     }
 }
