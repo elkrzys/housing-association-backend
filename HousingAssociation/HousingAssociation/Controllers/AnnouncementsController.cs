@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using HousingAssociation.DataAccess.Entities;
+using HousingAssociation.Models.DTOs;
 using HousingAssociation.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,46 +17,50 @@ namespace HousingAssociation.Controllers
 
         // worker, admin
         [HttpGet]
-        public async Task<IActionResult> GetAllAnnouncements()
-        {
-            return Ok();
-        }
-        // worker, admin, resident
-        [HttpGet("{userId:int}")]
-        public async Task<IActionResult> GetAllAnnouncementsByUserId(int userId)
-        {
-            return Ok();
-        }
+        public async Task<IActionResult> GetAllAnnouncements() => Ok(_announcementsService.GetAll());
+        
+        // resident
+        [HttpGet("{receiverId:int}")]
+        public async Task<IActionResult> GetAllAnnouncementsByReceiverId(int receiverId)
+            => Ok(await _announcementsService.GetAllByReceiverId(receiverId));
+
+        // worker, admin
+        [HttpGet("{authorId:int}")]
+        public async Task<IActionResult> GetAllAnnouncementsByAuthorId(int authorId)
+            => Ok(await _announcementsService.GetAllByAuthorId(authorId));
+        
         // worker, admin
         [HttpPost("filter")]
         public async Task<IActionResult> GetAllByFilters(AnnouncementsFilterRequest filter)
         {
-            return Ok();
+            return Ok(await _announcementsService.GetAllFiltered(filter));
         }
-        // resident
-        [HttpPost("{userId:int}/filter")]
-        public async Task<IActionResult> GetAllByUserIdAndFilters(int userId, AnnouncementsFilterRequest filter)
-        {
-            return Ok();
-        }
+
         // worker, admin
-        [HttpPost]
-        public async Task<IActionResult> Add(Announcement announcement)
+        [HttpPost("add-by-address")]
+        public async Task<IActionResult> AddByAddress(AnnouncementDto announcement)
         {
-            return Ok();
+            return Ok(_announcementsService.AddAnnouncementByAddress(announcement));
         }
+        
+        [HttpPost("add-by-buildings")]
+        public async Task<IActionResult> AddByBuildingsIds(AnnouncementDto announcement)
+        {
+            return Ok(_announcementsService.AddAnnouncementByBuildingsIds(announcement));
+        }
+        
         // worker, admin
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, Announcement announcement)
-        {
-            // TODO: set old announcement as cancelled and create new one
-            return Ok();
+        public async Task<IActionResult> Update(int id, AnnouncementDto announcement)
+        { 
+            announcement.Id = id;
+            return Ok(_announcementsService.UpdateAnnouncement(announcement));
         }
         // worker, admin
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Cancel(int id)
         {
-            // TODO: set announcement as cancelled
+            await _announcementsService.CancelAnnouncementById(id);
             return Ok();
         }
     }

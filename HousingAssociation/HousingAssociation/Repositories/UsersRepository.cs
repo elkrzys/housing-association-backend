@@ -44,10 +44,13 @@ namespace HousingAssociation.Repositories
             }
         }
 
-        public async Task<User> FindById(int id)
-        {
-            return await _users.FindAsync(id);
-        }
+        public async Task<User> FindById(int id) => await _users.FindAsync(id);
+
+        public async Task<User> FindByIdAndIncludeAllLocals(int id)
+            => await _users
+                .Include(u => u.ResidedLocals)
+                .Include(u => u.OwnedLocals)
+                .SingleAsync(u => u.Id == id);
 
         public async Task<List<User>> FindAllNotEnabledUsers()
         {

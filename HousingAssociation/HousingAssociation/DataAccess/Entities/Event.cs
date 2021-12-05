@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace HousingAssociation.DataAccess.Entities
 {
-    public abstract class Event
+    public abstract record Event
     {
         [Key] public int Id { get; set; }
         [Required] public EventType Type { get; set; }

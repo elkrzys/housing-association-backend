@@ -2,7 +2,7 @@
 
 namespace HousingAssociation.DataAccess.Entities
 {
-    public class Issue : Event
+    public record Issue : Event
     {
         [ForeignKey(nameof(Local))] public int? SourceLocalId { get; set; }
         [ForeignKey(nameof(Building))] public int SourceBuildingId { get; set; }

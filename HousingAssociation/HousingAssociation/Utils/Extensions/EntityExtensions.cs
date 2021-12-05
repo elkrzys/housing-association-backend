@@ -28,6 +28,17 @@ namespace HousingAssociation.Utils.Extensions
                 RemovesAt = document.RemovesAt,
                 FilePath = document.Filepath
             };
-        
+
+        public static AnnouncementDto AsDto(this Announcement announcement)
+            => new AnnouncementDto
+            {
+                Id = announcement.Id,
+                AuthorId = announcement.AuthorId,
+                Content = announcement.Content,
+                ExpirationDate = announcement.ExpirationDate,
+                Title = announcement.Title,
+                Type = announcement.Type
+            };
+
     }
 }
