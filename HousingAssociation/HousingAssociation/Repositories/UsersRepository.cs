@@ -35,13 +35,9 @@ namespace HousingAssociation.Repositories
             return null;
         }
 
-        public async Task Update(User user)
+        public void Update(User user)
         {
-            var existingUser = await _users.FindAsync(user.Id);
-            if (existingUser is null)
-            {
-                _users.Update(user);
-            }
+            _users.Update(user);
         }
 
         public async Task<User> FindById(int id) => await _users.FindAsync(id);

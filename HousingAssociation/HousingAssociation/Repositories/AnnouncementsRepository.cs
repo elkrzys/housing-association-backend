@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HousingAssociation.Controllers.Requests;
 using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;

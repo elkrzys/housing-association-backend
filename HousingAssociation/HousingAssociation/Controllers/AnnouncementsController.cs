@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using HousingAssociation.Controllers.Requests;
 using HousingAssociation.Models.DTOs;
 using HousingAssociation.Services;
 using Microsoft.AspNetCore.Mvc;

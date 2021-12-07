@@ -34,7 +34,7 @@ namespace HousingAssociation.Services
             if (user is null)
                 throw new BadRequestException();
             
-            await _unitOfWork.UsersRepository.Update(user with {IsEnabled = true});
+            _unitOfWork.UsersRepository.Update(user with {IsEnabled = true});
             _unitOfWork.Commit();
             
             return user.AsDto();
@@ -52,7 +52,7 @@ namespace HousingAssociation.Services
                 IsEnabled = false
             };
             
-            // generate worker credentials
+            // TODO: generate worker credentials
             user = await _unitOfWork.UsersRepository.AddIfNotExists(user);
         }
         
@@ -62,22 +62,29 @@ namespace HousingAssociation.Services
             if (user is null)
                 throw new BadRequestException($"User with id {userDto.Id} doesn't exist");
             
-            await _unitOfWork.UsersRepository.Update(user with
+            _unitOfWork.UsersRepository.Update(user with
             {
                 FirstName = userDto.FirstName,
                 LastName = userDto.LastName,
                 Email = userDto.Email,
-                PhoneNumber = userDto.PhoneNumber
+                PhoneNumber = userDto.PhoneNumber,
+                Role = userDto.Role ?? user.Role,
+                IsEnabled = userDto.IsEnabled ?? user.IsEnabled
             });
             _unitOfWork.Commit();
         }
 
-        public async Task ChangePassword(int userId, string newPassword)
+        public async Task ChangePassword(int userId, ChangePasswordRequest request)
         {
             var credentials = await _unitOfWork.UserCredentialsRepository.FindByUserId(userId);
             if (credentials is null)
                 throw new BadRequestException("User doesn't exist");
-            _unitOfWork.UserCredentialsRepository.Update(credentials with {PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword)});
+                    
+            if(!BCrypt.Net.BCrypt.Verify(request.OldPassword, credentials.PasswordHash))
+                throw new BadRequestException("Old password not valid");
+            
+            _unitOfWork.UserCredentialsRepository.Update(credentials with {PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword)});
+            _unitOfWork.Commit();
         }
         
         public async Task DeleteUser(int id)

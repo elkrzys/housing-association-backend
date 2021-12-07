@@ -71,7 +71,7 @@ namespace HousingAssociation.Services
             RemoveOldRefreshTokens(user);
 
             // save changes to db
-            await _unitOfWork.UsersRepository.Update(user);
+            _unitOfWork.UsersRepository.Update(user);
             _unitOfWork.Commit();
 
             return new LoginResponse(user, jwtToken, refreshToken.Token);
@@ -97,7 +97,7 @@ namespace HousingAssociation.Services
             {
                 // revoke all descendant tokens in case this token has been compromised
                 RevokeDescendantRefreshTokens(refreshToken, user, $"Attempted reuse of revoked ancestor token: {token}");
-                await _unitOfWork.UsersRepository.Update(user);
+                _unitOfWork.UsersRepository.Update(user);
                 _unitOfWork.Commit();
             }
 
@@ -112,7 +112,7 @@ namespace HousingAssociation.Services
             RemoveOldRefreshTokens(user);
 
             // save changes to db
-            await _unitOfWork.UsersRepository.Update(user);
+            _unitOfWork.UsersRepository.Update(user);
             _unitOfWork.Commit();
 
             // generate new jwt
@@ -133,7 +133,7 @@ namespace HousingAssociation.Services
 
             // revoke token and save
             RevokeRefreshToken(refreshToken, "Revoked without replacement");
-            await _unitOfWork.UsersRepository.Update(user);
+            _unitOfWork.UsersRepository.Update(user);
             _unitOfWork.Commit();
         }
         

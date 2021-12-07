@@ -13,7 +13,7 @@ namespace HousingAssociation.Models.DTOs
         [Required] [MaxLength(255)] public string LastName { get; set; }
         [Required] [MaxLength(10)] public string PhoneNumber { get; set; }
         [Required] [MaxLength(255)] public string Email { get; set; }
-        [Required] public Role Role { get; set; }
-        [Required] public bool IsEnabled { get; set; }
+        public Role? Role { get; set; }
+        public bool? IsEnabled { get; set; }
     }
 }

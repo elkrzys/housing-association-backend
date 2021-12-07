@@ -87,6 +87,7 @@ namespace HousingAssociation
                 options.UseNpgsql(dbSettings.ConnectionString)
                     .UseSnakeCaseNamingConvention()
                     .UseEnumCheckConstraints()
+                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
             );
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -114,12 +115,12 @@ namespace HousingAssociation
                 }
             }
             
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(env.WebRootPath, "documents")),
-                RequestPath = "/documents"
-            });
+            // app.UseStaticFiles(new StaticFileOptions
+            // {
+            //     FileProvider = new PhysicalFileProvider(
+            //         Path.Combine(env.WebRootPath, "documents")),
+            //     RequestPath = "/documents"
+            // });
             
             // app.UseDirectoryBrowser(new DirectoryBrowserOptions
             // {
@@ -134,7 +135,7 @@ namespace HousingAssociation
                 .AllowAnyHeader()
                 .AllowCredentials());
             
-            //app.UseMiddleware<ExceptionHandlingMiddleware>();
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
             //app.UseMiddleware<JwtMiddleware>();
             app.UseRouting();
             
