@@ -41,9 +41,15 @@ namespace HousingAssociation.Services
         
         public async Task AddAnnouncementByAddress(AnnouncementDto announcementDto)
         {
-            if (announcementDto.Address is null)
+            if (!announcementDto.Addresses.Any())
                 throw new BadRequestException("No target address defined");
-            var buildings = await _unitOfWork.BuildingsRepository.FindByAddressAsync(announcementDto.Address);
+
+            List<Building> buildings = new();
+            announcementDto.Addresses.ForEach(async address =>
+            {
+                var buildingsFromAddress = await _unitOfWork.BuildingsRepository.FindByAddressAsync(address);
+                buildings = buildings.Concat(buildingsFromAddress).Distinct().ToList();
+            });
             await AddAnnouncementWithBuildings(announcementDto, buildings);
         }
 
@@ -65,9 +71,13 @@ namespace HousingAssociation.Services
                         buildings.Add(building);
                 });
             }
-            else if (announcementDto.Address is not null)
+            else if (announcementDto.Addresses.Any())
             {
-                buildings = await _unitOfWork.BuildingsRepository.FindByAddressAsync(announcementDto.Address);
+                announcementDto.Addresses.ForEach(async address =>
+                {
+                    var buildingsFromAddress = await _unitOfWork.BuildingsRepository.FindByAddressAsync(address);
+                    buildings = buildings.Concat(buildingsFromAddress).Distinct().ToList();
+                });
             }
             else
             {

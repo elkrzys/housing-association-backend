@@ -41,7 +41,10 @@ namespace HousingAssociation.Repositories
         }
 
         public async Task<User> FindById(int id) => await _users.FindAsync(id);
-
+        
+        public async Task<List<User>> FindByRole(Role role)
+            => await _users.Where(user => user.Role == role).ToListAsync();
+        
         public async Task<User> FindByIdAndIncludeAllLocals(int id)
             => await _users
                 .Include(u => u.ResidedLocals)

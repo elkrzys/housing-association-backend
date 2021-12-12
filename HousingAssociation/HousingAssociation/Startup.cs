@@ -135,7 +135,7 @@ namespace HousingAssociation
                 .AllowAnyHeader()
                 .AllowCredentials());
             
-            app.UseMiddleware<ExceptionHandlingMiddleware>();
+            //app.UseMiddleware<ExceptionHandlingMiddleware>();
             //app.UseMiddleware<JwtMiddleware>();
             app.UseRouting();
             

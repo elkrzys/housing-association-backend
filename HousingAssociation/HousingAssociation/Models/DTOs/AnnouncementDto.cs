@@ -15,7 +15,7 @@ namespace HousingAssociation.Models.DTOs
         [Required] public int AuthorId { get; set; }
         public List<int> TargetBuildingsIds { get; set; }
         
-        public Address? Address { get; set; }
+        public List<Address> Addresses { get; set; }
         public DateTime? ExpirationDate { get; set; }
     }
 }

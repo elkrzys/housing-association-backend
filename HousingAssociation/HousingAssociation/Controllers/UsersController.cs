@@ -26,6 +26,13 @@ namespace HousingAssociation.Controllers
         public async Task<ActionResult<List<UserDto>>> GetUnconfirmedUsers() 
             => Ok(await _usersService.FindUnconfirmedUsers());
         
+        [HttpGet("residents")]
+        public async Task<ActionResult<List<UserDto>>> GetResidents() 
+            => Ok(await _usersService.FindAllResidents());
+        
+        [HttpGet("workers")]
+        public async Task<ActionResult<List<UserDto>>> GetWorkers() 
+            => Ok(await _usersService.FindAllWorkers());
 
         [HttpPost("add-worker")]
         public async Task<IActionResult> AddNewWorker(RegisterRequest request)

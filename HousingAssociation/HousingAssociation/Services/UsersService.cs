@@ -27,6 +27,23 @@ namespace HousingAssociation.Services
             users.ForEach(u => usersDtos.Add(u.AsDto()));
             return usersDtos;
         }
+        
+        public async Task<List<UserDto>> FindAllResidents()
+        {
+            var users = await _unitOfWork.UsersRepository.FindByRole(Role.Resident);
+            List<UserDto> usersDtos = new();
+            users.ForEach(u => usersDtos.Add(u.AsDto()));
+            return usersDtos;
+        }
+        
+        public async Task<List<UserDto>> FindAllWorkers()
+        {
+            var users = await _unitOfWork.UsersRepository.FindByRole(Role.Worker);
+            List<UserDto> usersDtos = new();
+            users.ForEach(u => usersDtos.Add(u.AsDto()));
+            return usersDtos;
+        }
+        
         public async Task<UserDto> FindUserById(int id) => (await _unitOfWork.UsersRepository.FindById(id)).AsDto();
         public async Task<UserDto> ConfirmUser(int id)
         {
