@@ -6,6 +6,7 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using HousingAssociation.Utils.Extensions;
 using NUnit.Framework.Internal;
 
 namespace HousingAssociationTests
@@ -59,9 +60,9 @@ namespace HousingAssociationTests
                 Address = address2
             };
 
-            var expectedBuilding1 = await _buildingsService.AddBuildingWithAddress(building1);
-            var expectedBuilding2 = await _buildingsService.AddBuildingWithAddress(building2);
-            var expectedBuilding3 = await _buildingsService.AddBuildingWithAddress(building3);
+            var expectedBuilding1 = await _buildingsService.AddBuildingWithAddress(building1.AsDto());
+            var expectedBuilding2 = await _buildingsService.AddBuildingWithAddress(building2.AsDto());
+            var expectedBuilding3 = await _buildingsService.AddBuildingWithAddress(building3.AsDto());
             
             // when
             var expectedBuildings = new List<Building>{expectedBuilding1, expectedBuilding2};

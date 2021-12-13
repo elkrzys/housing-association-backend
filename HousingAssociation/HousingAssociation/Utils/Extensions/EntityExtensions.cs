@@ -39,6 +39,15 @@ namespace HousingAssociation.Utils.Extensions
                 Title = announcement.Title,
                 Type = announcement.Type
             };
+        
+        public static BuildingDto AsDto(this Building building)
+            => new BuildingDto
+            {
+                Id = building.Id,
+                Address = building.Address,
+                Type = building.Type,
+                Number = building.Number,
+            };
 
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using HousingAssociation.DataAccess.Entities;
+using HousingAssociation.Models.DTOs;
 using HousingAssociation.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,7 +27,7 @@ namespace HousingAssociation.Controllers
             => Ok(await _buildingsService.GetAllBuildingsByAddress(new Address {City = city, District = district, Street = street}));
         
         [HttpPost]
-        public async Task<IActionResult> AddBuilding(Building building)
+        public async Task<IActionResult> AddBuilding(BuildingDto building)
             => Ok(await _buildingsService.AddBuildingWithAddress(building));
 
         [HttpPut("{id:int}")]

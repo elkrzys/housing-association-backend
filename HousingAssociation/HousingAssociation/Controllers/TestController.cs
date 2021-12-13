@@ -39,12 +39,5 @@ namespace HousingAssociation.Controllers
         {
             return DateTime.Now;
         }
-
-        [HttpPost]
-        public async Task<ActionResult<int>> PostBuilding(Building building)
-        {
-            var added = await _buildingsService.AddBuildingWithAddress(building);
-            return Ok(added.Id);
-        }
     }
 }

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.ExceptionHandling.Exceptions;
+using HousingAssociation.Models.DTOs;
 
 namespace HousingAssociation.Services
 {
@@ -14,10 +15,25 @@ namespace HousingAssociation.Services
             _unitOfWork = unitOfWork;
         }
         public async Task<List<Building>> GetAll() => await _unitOfWork.BuildingsRepository.FindAllAsync();
-        public async Task<Building> AddBuildingWithAddress(Building building)
+        public async Task<Building> AddBuildingWithAddress(BuildingDto buildingDto)
         {
-            var address = await _unitOfWork.AddressesRepository.AddNewAddressOrReturnExisting(building.Address);
-            building = await _unitOfWork.BuildingsRepository.AddAsync(building with {Address = address});
+            var address = await _unitOfWork.AddressesRepository.AddNewAddressOrReturnExisting(buildingDto.Address);
+            var building = new Building
+            {
+                Number = buildingDto.Number,
+                Type = buildingDto.Type
+            };
+            
+            if (address.Id is not 0)
+            {
+                building.AddressId = address.Id;
+            }
+            else
+            {
+                building.Address = address;
+            }
+
+            building = await _unitOfWork.BuildingsRepository.AddAsync(building);
             _unitOfWork.Commit();
 
             return building;
