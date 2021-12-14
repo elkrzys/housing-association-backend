@@ -22,11 +22,6 @@ namespace HousingAssociation.DataAccess
             await Context.SaveChangesAsync();
         }
 
-        public void Dispose()
-        {
-            Context.Dispose();
-        }
-
         private AddressesRepository _addressesRepository;
         private BuildingsRepository _buildingsRepository;
         private LocalsRepository _localsRepository;

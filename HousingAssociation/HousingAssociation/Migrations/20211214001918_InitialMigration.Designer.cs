@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace HousingAssociation.DataAccess.Migrations
+namespace HousingAssociation.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20211114213205_ChangeUserRefreshToken")]
-    partial class ChangeUserRefreshToken
+    [Migration("20211214001918_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -119,6 +119,10 @@ namespace HousingAssociation.DataAccess.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_cancelled_or_expired");
 
+                    b.Property<int?>("PreviousAnnouncementId")
+                        .HasColumnType("integer")
+                        .HasColumnName("previous_announcement_id");
+
                     b.Property<string>("Title")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
@@ -148,7 +152,7 @@ namespace HousingAssociation.DataAccess.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int?>("AddressId")
+                    b.Property<int>("AddressId")
                         .HasColumnType("integer")
                         .HasColumnName("address_id");
 
@@ -199,6 +203,11 @@ namespace HousingAssociation.DataAccess.Migrations
                         .HasColumnType("text")
                         .HasColumnName("filepath");
 
+                    b.Property<string>("Md5")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("md5");
+
                     b.Property<string>("Title")
                         .HasColumnType("text")
                         .HasColumnName("title");
@@ -234,9 +243,13 @@ namespace HousingAssociation.DataAccess.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<bool>("IsResolvedOrCancelled")
+                    b.Property<bool>("IsCancelled")
                         .HasColumnType("boolean")
-                        .HasColumnName("is_resolved_or_cancelled");
+                        .HasColumnName("is_cancelled");
+
+                    b.Property<bool>("IsResolved")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_resolved");
 
                     b.Property<int>("SourceBuildingId")
                         .HasColumnType("integer")
@@ -250,11 +263,6 @@ namespace HousingAssociation.DataAccess.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("title");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("type");
 
                     b.HasKey("Id")
                         .HasName("pk_issues");
@@ -270,8 +278,6 @@ namespace HousingAssociation.DataAccess.Migrations
                         .HasDatabaseName("ix_issues_source_local_id");
 
                     b.ToTable("issues");
-
-                    b.HasCheckConstraint("CK_issues_type_Enum", "type IN ('Issue', 'Announcement', 'Alert')");
                 });
 
             modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Local", b =>
@@ -508,7 +514,9 @@ namespace HousingAssociation.DataAccess.Migrations
                     b.HasOne("HousingAssociation.DataAccess.Entities.Address", "Address")
                         .WithMany()
                         .HasForeignKey("AddressId")
-                        .HasConstraintName("fk_buildings_addresses_address_id");
+                        .HasConstraintName("fk_buildings_addresses_address_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Address");
                 });

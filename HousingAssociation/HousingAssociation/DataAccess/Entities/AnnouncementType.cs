@@ -4,7 +4,7 @@ using Newtonsoft.Json.Converters;
 namespace HousingAssociation.DataAccess.Entities
 {
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum EventType
+    public enum AnnouncementType
     {
         Issue,
         Announcement,

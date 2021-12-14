@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace HousingAssociation.DataAccess.Migrations
+namespace HousingAssociation.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -241,9 +241,13 @@ namespace HousingAssociation.DataAccess.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<bool>("IsResolvedOrCancelled")
+                    b.Property<bool>("IsCancelled")
                         .HasColumnType("boolean")
-                        .HasColumnName("is_resolved_or_cancelled");
+                        .HasColumnName("is_cancelled");
+
+                    b.Property<bool>("IsResolved")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_resolved");
 
                     b.Property<int>("SourceBuildingId")
                         .HasColumnType("integer")
@@ -257,11 +261,6 @@ namespace HousingAssociation.DataAccess.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("title");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("type");
 
                     b.HasKey("Id")
                         .HasName("pk_issues");
@@ -277,8 +276,6 @@ namespace HousingAssociation.DataAccess.Migrations
                         .HasDatabaseName("ix_issues_source_local_id");
 
                     b.ToTable("issues");
-
-                    b.HasCheckConstraint("CK_issues_type_Enum", "type IN ('Issue', 'Announcement', 'Alert')");
                 });
 
             modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Local", b =>

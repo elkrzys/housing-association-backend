@@ -72,18 +72,13 @@ namespace HousingAssociation.DataAccess
             {
                 entity.Property(a => a.Type)
                     .HasConversion(v => v.ToString(),
-                        v => (EventType) Enum.Parse(typeof(EventType), v));
+                        v => (AnnouncementType) Enum.Parse(typeof(AnnouncementType), v));
 
                 entity.HasMany(a => a.TargetBuildings)
                     .WithMany(b => b.Announcements)
                     .UsingEntity(join => join.ToTable("announcements_buildings"));
 
             });
-            
-            modelBuilder.Entity<Issue>()
-                .Property(i => i.Type)
-                .HasConversion(v => v.ToString(),
-                    v => (EventType) Enum.Parse(typeof(EventType), v));
 
             base.OnModelCreating(modelBuilder);
         }

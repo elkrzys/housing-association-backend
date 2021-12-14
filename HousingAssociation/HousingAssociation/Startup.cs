@@ -98,8 +98,8 @@ namespace HousingAssociation
             services.AddScoped<UsersService>();
             services.AddScoped<DocumentsService>();
             services.AddScoped<AnnouncementsService>();
+            services.AddScoped<IssuesService>();
             services.AddScoped<AuthenticationService>();
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

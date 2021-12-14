@@ -48,6 +48,19 @@ namespace HousingAssociation.Utils.Extensions
                 Type = building.Type,
                 Number = building.Number,
             };
+        
+        public static IssueDto AsDto(this Issue issue)
+            => new IssueDto
+            {
+                Id = issue.Id,
+                AuthorId = issue.AuthorId,
+                Title = issue.Title,
+                Content = issue.Content,
+                IsCancelled = issue.IsCancelled,
+                IsResolved = issue.IsResolved,
+                SourceBuildingId = issue.SourceBuildingId,
+                SourceLocalId = issue.SourceLocalId
+            };
 
     }
 }

@@ -17,9 +17,15 @@ namespace HousingAssociation.Services
 
         public async Task AddLocals(List<Local> locals)
         {
-            if (!locals.Any()) throw new BadRequestException("Cannot add empty list of locals.");
-            locals.ForEach(async local => await AddLocalOrThrowBadRequestIfAlreadyExists(local));
-            _unitOfWork.Commit();
+            if (!locals.Any()) 
+                throw new BadRequestException("Cannot add empty list of locals.");
+
+            foreach (var local in locals)
+            {
+                await AddLocalOrThrowBadRequestIfAlreadyExists(local);
+            }
+            
+            await _unitOfWork.CommitAsync();
         }
 
         public async Task<List<Local>> FindAllFromBuilding(int buildingId)

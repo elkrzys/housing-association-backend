@@ -9,7 +9,7 @@ namespace HousingAssociation.Models.DTOs
     public class AnnouncementDto
     {
         public int? Id { get; set; }
-        [Required] public EventType Type { get; set; }
+        [Required] public AnnouncementType Type { get; set; }
         [MaxLength(255)] public string Title { get; set; }
         [MaxLength(255)] public string Content { get; set; }
         [Required] public int AuthorId { get; set; }

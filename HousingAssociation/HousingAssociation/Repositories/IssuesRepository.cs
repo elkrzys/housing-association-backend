@@ -10,31 +10,36 @@ namespace HousingAssociation.Repositories
     public class IssuesRepository
     {
         private readonly DbSet<Issue> _issues;
+        //public AppDbContext Context { get; }
 
         public IssuesRepository(AppDbContext dbContext)
         {
+            //Context = dbContext;
             _issues = dbContext.Issues;
         }
-
-        public async Task Add(Issue issue) => await _issues.AddAsync(issue);
-        
-        public async Task Update(Issue issue)
+        public async Task<bool> CheckIfExistsAsync(Issue issue)
+            => await _issues.AnyAsync(i =>
+                i.Title.Equals(issue.Title) &&
+                i.Content.Equals(issue.Content) &&
+                i.SourceLocalId == issue.SourceLocalId &&
+                i.SourceBuildingId == issue.SourceBuildingId);
+        public async Task AddAsync(Issue issue)
         {
-            var existingIssue = await _issues.FindAsync(issue.Id);
-            if (existingIssue is not null)
-            {
-                _issues.Update(issue);
-            }
+            await _issues.AddAsync(issue);
+            //await Context.SaveChangesAsync();
         }
 
+        public void Update(Issue issue) => _issues.Update(issue);
         public void Delete(Issue issue) => _issues.Remove(issue);
-
-        public async Task<Issue> FindIssueById(int id) => await _issues.FindAsync(id);
-
-        public async Task<List<Issue>> FindAll() => await _issues.ToListAsync();
-
-        public async Task<List<Issue>> FindAllBySourceBuildingId(int buildingId) =>
+        public async Task<Issue> FindByIdAsync(int id) => await _issues.FindAsync(id);
+        public async Task<List<Issue>> FindAllAsync() => await _issues.ToListAsync();
+        public async Task<List<Issue>> FindAllNotCancelledAsync() 
+            => await _issues
+                .Where(issue => !issue.IsCancelled)
+                .ToListAsync();
+        public async Task<List<Issue>> FindAllBySourceBuildingIdAsync(int buildingId) =>
             await _issues.Where(issue => issue.SourceBuildingId == buildingId).ToListAsync();
-
+        public async Task<List<Issue>> FindAllByAuthorIdAsync(int authorId) =>
+            await _issues.Where(issue => issue.AuthorId == authorId).ToListAsync();
     }
 }
