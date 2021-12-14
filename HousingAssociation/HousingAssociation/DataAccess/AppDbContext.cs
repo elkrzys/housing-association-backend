@@ -34,7 +34,7 @@ namespace HousingAssociation.DataAccess
                     .HasConversion(
                         v => v.ToString(),
                         v => (Role) Enum.Parse(typeof(Role), v));
-                
+
                 entity.HasOne(u => u.UserCredentials)
                     .WithOne(c => c.User)
                     .HasForeignKey<UserCredentials>(c => c.UserId)
@@ -43,13 +43,20 @@ namespace HousingAssociation.DataAccess
                 entity.HasMany(u => u.Documents)
                     .WithMany(d => d.Receivers)
                     .UsingEntity(join => join.ToTable("users_documents"));
-                
+
                 entity.HasOne(u => u.Document)
                     .WithOne(d => d.Author)
                     .HasForeignKey<Document>(d => d.AuthorId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<Issue>(entity =>
+            {
+                entity.HasOne(i => i.Local)
+                    .WithMany(l => l.Issues)
+                    .HasForeignKey(i => i.SourceLocalId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
 
             modelBuilder.Entity<Local>(entity =>
             {

@@ -11,8 +11,8 @@ namespace HousingAssociation.DataAccess.Entities
         [MaxLength(255)] public string Title { get; set; }
         [MaxLength(255)] public string Content { get; set; }
         [Required][ForeignKey("Author")] public int AuthorId { get; set; }
-        [Required] public DateTime CreatedAt { get; set; }
+        [Required] public DateTimeOffset Created { get; set; }
 
-        [JsonIgnore] public User Author { get; set; }
+        public User Author { get; set; }
     }
 }

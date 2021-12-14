@@ -52,17 +52,17 @@ namespace HousingAssociation.Repositories
                                   (string.IsNullOrEmpty(address.Street) || b.Address.Street.Equals(address.Street)))
                 .ToListAsync();
 
-        public async Task<List<Announcement>> FindAllFiltered(AnnouncementsFilterRequest filter)
-            => await _announcements
-                .Include(a => a.TargetBuildings)
-                .ThenInclude(b =>
-                    (string.IsNullOrEmpty(filter.Address.City) || b.Address.City.Equals(filter.Address.City)) &&
-                    (string.IsNullOrEmpty(filter.Address.District) || b.Address.District.Equals(filter.Address.District)) &&
-                    (string.IsNullOrEmpty(filter.Address.Street) || b.Address.Street.Equals(filter.Address.Street)))
-                .Where(a => 
-                    (filter.IsActual == null || a.IsCancelledOrExpired != filter.IsActual) &&
-                    (filter.DateFrom == null || a.CreatedAt >= filter.DateFrom) &&
-                    (filter.DateTo == null || a.CreatedAt <= filter.DateTo))
-                .ToListAsync();
+        // public async Task<List<Announcement>> FindAllFiltered(AnnouncementsFilterRequest filter)
+        //     => await _announcements
+        //         .Include(a => a.TargetBuildings)
+        //         .ThenInclude(b =>
+        //             (string.IsNullOrEmpty(filter.Address.City) || b.Address.City.Equals(filter.Address.City)) &&
+        //             (string.IsNullOrEmpty(filter.Address.District) || b.Address.District.Equals(filter.Address.District)) &&
+        //             (string.IsNullOrEmpty(filter.Address.Street) || b.Address.Street.Equals(filter.Address.Street)))
+        //         .Where(a => 
+        //             (filter.IsActual == null || a.IsCancelledOrExpired != filter.IsActual) &&
+        //             (filter.DateFrom == null || a.CreatedAt >= filter.DateFrom) &&
+        //             (filter.DateTo == null || a.CreatedAt <= filter.DateTo))
+        //         .ToListAsync();
     }
 }

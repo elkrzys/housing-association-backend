@@ -31,11 +31,11 @@ namespace HousingAssociation.Controllers
             => Ok(await _announcementsService.GetAllByAuthorId(authorId));
         
         // worker, admin
-        [HttpPost("filter")]
-        public async Task<IActionResult> GetAllByFilters(AnnouncementsFilterRequest filter)
-        {
-            return Ok(await _announcementsService.GetAllFiltered(filter));
-        }
+        // [HttpPost("filter")]
+        // public async Task<IActionResult> GetAllByFilters(AnnouncementsFilterRequest filter)
+        // {
+        //     return Ok(await _announcementsService.GetAllFiltered(filter));
+        // }
 
         // worker, admin
         [HttpPost("add-by-address")]

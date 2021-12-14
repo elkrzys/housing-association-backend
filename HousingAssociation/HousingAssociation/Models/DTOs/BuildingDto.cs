@@ -9,6 +9,8 @@ namespace HousingAssociation.Models.DTOs
         [Required] [MaxLength(255)] public string Number { get; set; }
         [Required] public Address Address { get; set; }
         [Required] public BuildingType Type { get; set; }
+        
+        public int? NumberOfLocals { get; set; }
 
     }
 }

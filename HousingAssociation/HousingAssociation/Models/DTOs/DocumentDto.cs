@@ -9,7 +9,7 @@ namespace HousingAssociation.Models.DTOs
         public string Title { get; set; }
         public int AuthorId { get; set; }
         public string FilePath { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? RemovesAt { get; set; }
+        public DateTimeOffset Created { get; set; }
+        public DateTimeOffset? Removes { get; set; }
     }
 }

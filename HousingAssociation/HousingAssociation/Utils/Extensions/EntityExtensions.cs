@@ -24,8 +24,8 @@ namespace HousingAssociation.Utils.Extensions
                 Id = document.Id,
                 Title = document.Title,
                 AuthorId = document.AuthorId,
-                CreatedAt = document.CreatedAt,
-                RemovesAt = document.RemovesAt,
+                Created = document.Created,
+                Removes = document.Removes,
                 FilePath = document.Filepath
             };
 
@@ -47,6 +47,7 @@ namespace HousingAssociation.Utils.Extensions
                 Address = building.Address,
                 Type = building.Type,
                 Number = building.Number,
+                NumberOfLocals = building.Locals?.Count
             };
         
         public static IssueDto AsDto(this Issue issue)
@@ -56,11 +57,22 @@ namespace HousingAssociation.Utils.Extensions
                 AuthorId = issue.AuthorId,
                 Title = issue.Title,
                 Content = issue.Content,
-                IsCancelled = issue.IsCancelled,
-                IsResolved = issue.IsResolved,
+                Cancelled = issue.Cancelled,
+                Resolved = issue.Resolved,
                 SourceBuildingId = issue.SourceBuildingId,
-                SourceLocalId = issue.SourceLocalId
+                SourceLocalId = issue.SourceLocalId,
+                Address = issue.Building?.Address
             };
 
+        public static LocalDto AsDto(this Local local)
+            => new LocalDto
+            {
+                Id = local.Id,
+                BuildingId = local.BuildingId,
+                Area = local.Area,
+                Number = local.Number,
+                IsFullyOwned = local.IsFullyOwned,
+                NumberOfResidents = local.Residents?.Count
+            };
     }
 }

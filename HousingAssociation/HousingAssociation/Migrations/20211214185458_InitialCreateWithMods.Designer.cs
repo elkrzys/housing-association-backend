@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HousingAssociation.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20211214001918_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20211214185458_InitialCreateWithMods")]
+    partial class InitialCreateWithMods
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -102,22 +102,26 @@ namespace HousingAssociation.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("author_id");
 
+                    b.Property<DateTimeOffset?>("Cancelled")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cancelled");
+
                     b.Property<string>("Content")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("content");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created");
 
-                    b.Property<DateTime?>("ExpirationDate")
-                        .HasColumnType("timestamp without time zone")
+                    b.Property<DateTimeOffset?>("ExpirationDate")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("expiration_date");
 
-                    b.Property<bool>("IsCancelledOrExpired")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_cancelled_or_expired");
+                    b.Property<DateTimeOffset?>("Expired")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expired");
 
                     b.Property<int?>("PreviousAnnouncementId")
                         .HasColumnType("integer")
@@ -138,6 +142,9 @@ namespace HousingAssociation.Migrations
 
                     b.HasIndex("AuthorId")
                         .HasDatabaseName("ix_announcements_author_id");
+
+                    b.HasIndex("PreviousAnnouncementId")
+                        .HasDatabaseName("ix_announcements_previous_announcement_id");
 
                     b.ToTable("announcements");
 
@@ -190,9 +197,9 @@ namespace HousingAssociation.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("author_id");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created");
 
                     b.Property<int?>("DaysToExpire")
                         .HasColumnType("integer")
@@ -234,22 +241,26 @@ namespace HousingAssociation.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("author_id");
 
+                    b.Property<DateTimeOffset?>("Cancelled")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cancelled");
+
                     b.Property<string>("Content")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("content");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created");
 
-                    b.Property<bool>("IsCancelled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_cancelled");
+                    b.Property<int?>("PreviousIssueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("previous_issue_id");
 
-                    b.Property<bool>("IsResolved")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_resolved");
+                    b.Property<DateTimeOffset?>("Resolved")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("resolved");
 
                     b.Property<int>("SourceBuildingId")
                         .HasColumnType("integer")
@@ -270,6 +281,9 @@ namespace HousingAssociation.Migrations
                     b.HasIndex("AuthorId")
                         .IsUnique()
                         .HasDatabaseName("ix_issues_author_id");
+
+                    b.HasIndex("PreviousIssueId")
+                        .HasDatabaseName("ix_issues_previous_issue_id");
 
                     b.HasIndex("SourceBuildingId")
                         .HasDatabaseName("ix_issues_source_building_id");
@@ -300,8 +314,8 @@ namespace HousingAssociation.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_fully_owned");
 
-                    b.Property<int?>("Number")
-                        .HasColumnType("integer")
+                    b.Property<string>("Number")
+                        .HasColumnType("text")
                         .HasColumnName("number");
 
                     b.HasKey("Id")
@@ -321,12 +335,12 @@ namespace HousingAssociation.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp without time zone")
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("created");
 
-                    b.Property<DateTime>("Expires")
-                        .HasColumnType("timestamp without time zone")
+                    b.Property<DateTimeOffset>("Expires")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("expires");
 
                     b.Property<string>("ReasonRevoked")
@@ -337,8 +351,8 @@ namespace HousingAssociation.Migrations
                         .HasColumnType("text")
                         .HasColumnName("replaced_by_token");
 
-                    b.Property<DateTime?>("Revoked")
-                        .HasColumnType("timestamp without time zone")
+                    b.Property<DateTimeOffset?>("Revoked")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("revoked");
 
                     b.Property<string>("Token")
@@ -506,7 +520,14 @@ namespace HousingAssociation.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("HousingAssociation.DataAccess.Entities.Announcement", "PreviousAnnouncement")
+                        .WithMany()
+                        .HasForeignKey("PreviousAnnouncementId")
+                        .HasConstraintName("fk_announcements_announcements_previous_announcement_id");
+
                     b.Navigation("Author");
+
+                    b.Navigation("PreviousAnnouncement");
                 });
 
             modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Building", b =>
@@ -542,6 +563,11 @@ namespace HousingAssociation.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("HousingAssociation.DataAccess.Entities.Issue", "PreviousIssue")
+                        .WithMany()
+                        .HasForeignKey("PreviousIssueId")
+                        .HasConstraintName("fk_issues_issues_previous_issue_id");
+
                     b.HasOne("HousingAssociation.DataAccess.Entities.Building", "Building")
                         .WithMany()
                         .HasForeignKey("SourceBuildingId")
@@ -550,7 +576,7 @@ namespace HousingAssociation.Migrations
                         .IsRequired();
 
                     b.HasOne("HousingAssociation.DataAccess.Entities.Local", "Local")
-                        .WithMany()
+                        .WithMany("Issues")
                         .HasForeignKey("SourceLocalId")
                         .HasConstraintName("fk_issues_locals_source_local_id");
 
@@ -559,16 +585,20 @@ namespace HousingAssociation.Migrations
                     b.Navigation("Building");
 
                     b.Navigation("Local");
+
+                    b.Navigation("PreviousIssue");
                 });
 
             modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Local", b =>
                 {
-                    b.HasOne("HousingAssociation.DataAccess.Entities.Building", null)
+                    b.HasOne("HousingAssociation.DataAccess.Entities.Building", "Building")
                         .WithMany("Locals")
                         .HasForeignKey("BuildingId")
                         .HasConstraintName("fk_locals_buildings_building_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Building");
                 });
 
             modelBuilder.Entity("HousingAssociation.DataAccess.Entities.RefreshToken", b =>
@@ -632,6 +662,11 @@ namespace HousingAssociation.Migrations
             modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Building", b =>
                 {
                     b.Navigation("Locals");
+                });
+
+            modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Local", b =>
+                {
+                    b.Navigation("Issues");
                 });
 
             modelBuilder.Entity("HousingAssociation.DataAccess.Entities.User", b =>

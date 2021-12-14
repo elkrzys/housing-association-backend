@@ -16,14 +16,14 @@ namespace HousingAssociation.Controllers
             _issuesService = issuesService;
         }
 
-        // [HttpGet]
-        // public async Task<IActionResult> GetAllNotCancelled() => Ok(await _issuesService.GetAllNotCancelled());
-        //
-        // [HttpGet("{id:int}")]
-        // public async Task<IActionResult> GetById(int id) => Ok(await _issuesService.GetById(id));
-        //
-        // [HttpGet("{authorId:int}")]
-        // public async Task<IActionResult> GetByAuthorId(int authorId) => Ok(await _issuesService.GetAllByAuthorId(authorId));
+        [HttpGet]
+        public async Task<IActionResult> GetAllNotCancelled() => Ok(await _issuesService.GetAllNotCancelled());
+        
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id) => Ok(await _issuesService.GetById(id));
+        
+        [HttpGet("author/{authorId:int}")]
+        public async Task<IActionResult> GetByAuthorId(int authorId) => Ok(await _issuesService.GetAllByAuthorId(authorId));
         
         [HttpPost]
         public async Task<IActionResult> AddIssue(IssueDto issue)
@@ -31,6 +31,19 @@ namespace HousingAssociation.Controllers
             await _issuesService.AddIssue(issue);
             return Ok();
         }
+        
+        [HttpPut("resolve/{id:int}")]
+        public async Task<IActionResult> ResolveIssue(int id)
+        {
+            await _issuesService.ResolveIssue(id);
+            return Ok();
+        }
 
+        [HttpPut("cancel/{id:int}")]
+        public async Task<IActionResult> CancelIssue(int id)
+        {
+            await _issuesService.CancelIssue(id);
+            return Ok();
+        }
     }
 }

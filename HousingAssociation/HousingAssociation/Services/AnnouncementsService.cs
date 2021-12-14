@@ -144,20 +144,20 @@ namespace HousingAssociation.Services
             var announcement = await _unitOfWork.AnnouncementsRepository.FindById(id) 
                                ?? throw new NotFoundException();
 
-            announcement.IsCancelledOrExpired = true;
+            announcement.Cancelled = DateTimeOffset.Now;
             
             await _unitOfWork.AnnouncementsRepository.Update(announcement);
             _unitOfWork.Commit();
         }
 
-        public async Task<List<AnnouncementDto>> GetAllFiltered(AnnouncementsFilterRequest filter)
-        {
-            if (filter is null)
-                throw new BadRequestException();
-            filter.Address ??= new Address();
-            var announcements =  await _unitOfWork.AnnouncementsRepository.FindAllFiltered(filter);
-            return GetAnnouncementsAsDtos(announcements);
-        }
+        // public async Task<List<AnnouncementDto>> GetAllFiltered(AnnouncementsFilterRequest filter)
+        // {
+        //     if (filter is null)
+        //         throw new BadRequestException();
+        //     filter.Address ??= new Address();
+        //     var announcements =  await _unitOfWork.AnnouncementsRepository.FindAllFiltered(filter);
+        //     return GetAnnouncementsAsDtos(announcements);
+        // }
 
         private async Task AddAnnouncementWithBuildings(AnnouncementDto announcementDto, List<Building> buildings)
         {
@@ -165,7 +165,7 @@ namespace HousingAssociation.Services
             {
                 TargetBuildings = buildings,
                 AuthorId = announcementDto.AuthorId,
-                CreatedAt = DateTime.Now,
+                Created = DateTimeOffset.Now,
                 Content = announcementDto.Content,
                 Title = announcementDto.Title,
                 ExpirationDate = announcementDto.ExpirationDate,

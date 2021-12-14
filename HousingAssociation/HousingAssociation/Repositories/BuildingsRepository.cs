@@ -14,8 +14,16 @@ namespace HousingAssociation.Repositories
         {
             _buildings = dbContext.Buildings;
         }
-        public async Task<List<Building>> FindAllAsync() => await _buildings.ToListAsync();
-        public async Task<Building> FindByIdAsync(int id) => await _buildings.FindAsync(id);
+        public async Task<List<Building>> FindAllAsync() 
+            => await _buildings
+                .Include(b => b.Address)
+                .Include(b => b.Locals)
+                .ToListAsync();
+
+        public async Task<Building> FindByIdAsync(int id)
+            => await _buildings
+                .Include(b => b.Address)
+                .SingleOrDefaultAsync(b => b.Id == id);
         public async Task<Building> FindByIdWithLocalsAsync(int id)
             => await _buildings
                 .Include(b => b.Locals)
@@ -30,6 +38,7 @@ namespace HousingAssociation.Repositories
         public async Task<List<Building>> FindByAddressAsync(Address address) 
             => await _buildings
                     .Include(b => b.Address)
+                    .Include(b => b.Locals)
                     .Where(b =>
                         (string.IsNullOrEmpty(address.City) || b.Address.City.Equals(address.City)) &&
                         (string.IsNullOrEmpty(address.District) || b.Address.District.Equals(address.District)) &&

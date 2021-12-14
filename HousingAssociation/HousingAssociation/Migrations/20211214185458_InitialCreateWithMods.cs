@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace HousingAssociation.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class InitialCreateWithMods : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -71,18 +71,25 @@ namespace HousingAssociation.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     type = table.Column<string>(type: "text", nullable: false),
-                    expiration_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    is_cancelled_or_expired = table.Column<bool>(type: "boolean", nullable: false),
                     previous_announcement_id = table.Column<int>(type: "integer", nullable: true),
+                    expiration_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    cancelled = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    expired = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     content = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     author_id = table.Column<int>(type: "integer", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                    created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_announcements", x => x.id);
                     table.CheckConstraint("CK_announcements_type_Enum", "type IN ('Issue', 'Announcement', 'Alert')");
+                    table.ForeignKey(
+                        name: "fk_announcements_announcements_previous_announcement_id",
+                        column: x => x.previous_announcement_id,
+                        principalTable: "announcements",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_announcements_users_author_id",
                         column: x => x.author_id,
@@ -117,7 +124,7 @@ namespace HousingAssociation.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     title = table.Column<string>(type: "text", nullable: true),
                     author_id = table.Column<int>(type: "integer", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     filepath = table.Column<string>(type: "text", nullable: false),
                     md5 = table.Column<string>(type: "text", nullable: false),
                     days_to_expire = table.Column<int>(type: "integer", nullable: true)
@@ -141,9 +148,9 @@ namespace HousingAssociation.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     user_id = table.Column<int>(type: "integer", nullable: false),
                     token = table.Column<string>(type: "text", nullable: true),
-                    expires = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    created = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    revoked = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    expires = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    revoked = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     replaced_by_token = table.Column<string>(type: "text", nullable: true),
                     reason_revoked = table.Column<string>(type: "text", nullable: true)
                 },
@@ -164,7 +171,7 @@ namespace HousingAssociation.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    number = table.Column<int>(type: "integer", nullable: true),
+                    number = table.Column<string>(type: "text", nullable: true),
                     area = table.Column<float>(type: "real", nullable: true),
                     building_id = table.Column<int>(type: "integer", nullable: false),
                     is_fully_owned = table.Column<bool>(type: "boolean", nullable: false)
@@ -236,12 +243,13 @@ namespace HousingAssociation.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     source_local_id = table.Column<int>(type: "integer", nullable: true),
                     source_building_id = table.Column<int>(type: "integer", nullable: false),
-                    is_resolved = table.Column<bool>(type: "boolean", nullable: false),
-                    is_cancelled = table.Column<bool>(type: "boolean", nullable: false),
+                    previous_issue_id = table.Column<int>(type: "integer", nullable: true),
+                    resolved = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    cancelled = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     content = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     author_id = table.Column<int>(type: "integer", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                    created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -252,6 +260,12 @@ namespace HousingAssociation.Migrations
                         principalTable: "buildings",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_issues_issues_previous_issue_id",
+                        column: x => x.previous_issue_id,
+                        principalTable: "issues",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_issues_locals_source_local_id",
                         column: x => x.source_local_id,
@@ -320,6 +334,11 @@ namespace HousingAssociation.Migrations
                 column: "author_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_announcements_previous_announcement_id",
+                table: "announcements",
+                column: "previous_announcement_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_announcements_buildings_target_buildings_id",
                 table: "announcements_buildings",
                 column: "target_buildings_id");
@@ -332,12 +351,19 @@ namespace HousingAssociation.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_documents_author_id",
                 table: "documents",
-                column: "author_id");
+                column: "author_id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_issues_author_id",
                 table: "issues",
-                column: "author_id");
+                column: "author_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_issues_previous_issue_id",
+                table: "issues",
+                column: "previous_issue_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_issues_source_building_id",

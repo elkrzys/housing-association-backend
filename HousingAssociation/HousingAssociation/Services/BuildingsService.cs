@@ -4,6 +4,7 @@ using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.ExceptionHandling.Exceptions;
 using HousingAssociation.Models.DTOs;
+using HousingAssociation.Utils.Extensions;
 
 namespace HousingAssociation.Services
 {
@@ -14,8 +15,13 @@ namespace HousingAssociation.Services
         {
             _unitOfWork = unitOfWork;
         }
-        public async Task<List<Building>> GetAll() => await _unitOfWork.BuildingsRepository.FindAllAsync();
-        public async Task<Building> AddBuildingWithAddress(BuildingDto buildingDto)
+        public async Task<List<BuildingDto>> GetAll()
+        {
+            var buildings = await _unitOfWork.BuildingsRepository.FindAllAsync();
+            return GetBuildingsAsDtos(buildings);
+        }
+
+        public async Task AddBuildingWithAddress(BuildingDto buildingDto)
         {
             var address = await _unitOfWork.AddressesRepository.AddNewAddressOrReturnExisting(buildingDto.Address);
             var building = new Building
@@ -33,30 +39,33 @@ namespace HousingAssociation.Services
                 building.Address = address;
             }
 
-            building = await _unitOfWork.BuildingsRepository.AddAsync(building);
-            _unitOfWork.Commit();
-
-            return building;
+            await _unitOfWork.BuildingsRepository.AddAsync(building);
+            await _unitOfWork.CommitAsync();
         }
-        public async Task<List<Building>> GetAllBuildingsByAddress(Address address) 
-            => await _unitOfWork.BuildingsRepository.FindByAddressAsync(address);
-        
-        public async Task Update(Building building)
+        public async Task<List<BuildingDto>> GetAllBuildingsByAddress(Address address)
         {
-            if (await _unitOfWork.BuildingsRepository.FindByIdAsync(building.Id) is null)
-                throw new NotFoundException();
+            var buildings = await _unitOfWork.BuildingsRepository.FindByAddressAsync(address);
+            return GetBuildingsAsDtos(buildings);
+        }
 
-            var address = await _unitOfWork.AddressesRepository.AddNewAddressOrReturnExisting(building.Address);
-            
-            _unitOfWork.BuildingsRepository.Update(building with { Address = address });
-            _unitOfWork.Commit();
+        public async Task Update(BuildingDto buildingDto)
+        {
+          
+            await _unitOfWork.CommitAsync();
         }
 
         public async Task DeleteById(int id)
         {
             var building = await _unitOfWork.BuildingsRepository.FindByIdAsync(id) ?? throw new NotFoundException();
             _unitOfWork.BuildingsRepository.Delete(building);
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
+        }
+
+        private List<BuildingDto> GetBuildingsAsDtos(List<Building> buildings)
+        {
+            List<BuildingDto> buildingDtos = new();
+            buildings.ForEach(building => buildingDtos.Add(building.AsDto()));
+            return buildingDtos;
         }
         
     }

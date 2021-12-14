@@ -55,7 +55,7 @@ namespace HousingAssociation.Services
                 Title = request.Title,
                 AuthorId = request.AuthorId,
                 Receivers = documentReceivers,
-                CreatedAt = DateTime.Now,
+                Created = DateTime.Now,
                 DaysToExpire = request.DaysToExpire,
                 Md5 = documentMd5,
                 Filepath = path

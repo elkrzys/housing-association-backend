@@ -28,12 +28,16 @@ namespace HousingAssociation.Controllers
         
         [HttpPost]
         public async Task<IActionResult> AddBuilding(BuildingDto building)
-            => Ok(await _buildingsService.AddBuildingWithAddress(building));
+        {
+            await _buildingsService.AddBuildingWithAddress(building);
+            return Ok();
+        }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateBuilding(int id, Building building)
+        public async Task<IActionResult> UpdateBuilding(int id, BuildingDto building)
         {
-            await _buildingsService.Update(building with {Id = id});
+            building.Id = id;
+            await _buildingsService.Update(building);
             return Ok();
         }
 
