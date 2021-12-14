@@ -21,6 +21,6 @@ namespace HousingAssociation.DataAccess.Entities
         [JsonIgnore] public List<RefreshToken> RefreshTokens { get; set; }
         public List<Document> Documents { get; set; }
         public Document Document { get; set; }
-        public Issue Issue { get; set; }
+        public List<Issue> Issues { get; set; }
     }
 }
