@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
@@ -25,19 +26,18 @@ namespace HousingAssociation.Services
 
         public async Task AddIssue(IssueDto issueDto)
         {
+            if (await _unitOfWork.IssuesRepository.CheckIfExistsAsync(issueDto))
+            {
+                throw new BadRequestException("Issue already exists");
+            }
+            
             var issue = new Issue
             {
                 Title = issueDto.Title,
                 Content = issueDto.Content,
-                SourceBuildingId = issueDto.SourceBuildingId,
                 SourceLocalId = issueDto.SourceLocalId,
                 AuthorId = issueDto.AuthorId
             };
-
-            if (await _unitOfWork.IssuesRepository.CheckIfExistsAsync(issue))
-            {
-                throw new BadRequestException("Issue already exists");
-            }
 
             await _unitOfWork.IssuesRepository.AddAsync(issue with {Created = DateTime.Now});
             await _unitOfWork.CommitAsync();
@@ -77,13 +77,7 @@ namespace HousingAssociation.Services
         
         private async Task<List<IssueDto>> GetIssuesAsDtos(List<Issue> issues)
         {
-            List<IssueDto> issuesDtos = new();
-            foreach (var issue in issues)
-            {
-                var issueBuilding = await _unitOfWork.BuildingsRepository.FindByIdAsync(issue.SourceBuildingId);
-                issuesDtos.Add(issue.AsDto());
-            }
-            return issuesDtos;
+            return issues.Select(issue => issue.AsDto()).ToList();
         }
     }
 }

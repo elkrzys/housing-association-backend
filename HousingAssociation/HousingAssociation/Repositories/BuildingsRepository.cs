@@ -20,10 +20,11 @@ namespace HousingAssociation.Repositories
                 .Include(b => b.Locals)
                 .ToListAsync();
 
-        public async Task<Building> FindByIdAsync(int id)
+        public async Task<Building> FindByIdWithAddressAsync(int id)
             => await _buildings
                 .Include(b => b.Address)
                 .SingleOrDefaultAsync(b => b.Id == id);
+        
         public async Task<Building> FindByIdWithLocalsAsync(int id)
             => await _buildings
                 .Include(b => b.Locals)

@@ -56,7 +56,7 @@ namespace HousingAssociation.Services
 
         public async Task DeleteById(int id)
         {
-            var building = await _unitOfWork.BuildingsRepository.FindByIdAsync(id) ?? throw new NotFoundException();
+            var building = await _unitOfWork.BuildingsRepository.FindByIdWithAddressAsync(id) ?? throw new NotFoundException();
             _unitOfWork.BuildingsRepository.Delete(building);
             await _unitOfWork.CommitAsync();
         }

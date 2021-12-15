@@ -40,7 +40,7 @@ namespace HousingAssociation.Services
 
         public async Task<List<LocalDto>> FindAllFromBuilding(int buildingId)
         {
-            if(await _unitOfWork.BuildingsRepository.FindByIdAsync(buildingId) is null)
+            if(await _unitOfWork.BuildingsRepository.FindByIdWithAddressAsync(buildingId) is null)
                 throw new BadRequestException("Building doesn't exists.");
             
             var locals= await _unitOfWork.LocalsRepository.FindAllByBuildingIdAsync(buildingId);

@@ -3,15 +3,17 @@ using System;
 using HousingAssociation.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace HousingAssociation.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211215192016_RemoveBuildngIdFromIssue")]
+    partial class RemoveBuildngIdFromIssue
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -260,7 +262,7 @@ namespace HousingAssociation.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("resolved");
 
-                    b.Property<int?>("SourceLocalId")
+                    b.Property<int>("SourceLocalId")
                         .HasColumnType("integer")
                         .HasColumnName("source_local_id");
 
@@ -562,7 +564,8 @@ namespace HousingAssociation.Migrations
                         .WithMany("Issues")
                         .HasForeignKey("SourceLocalId")
                         .HasConstraintName("fk_issues_locals_source_local_id")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
 
                     b.Navigation("Author");
 

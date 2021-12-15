@@ -8,7 +8,7 @@ namespace HousingAssociation.DataAccess.Entities
     public record Announcement : Event
     {
         [Required] public AnnouncementType Type { get; set; }
-        [ForeignKey("PreviousAnnouncement")] int? PreviousAnnouncementId { get; set; }
+        [ForeignKey("PreviousAnnouncement")] public int? PreviousAnnouncementId { get; set; }
         public List<Building> TargetBuildings { get; set; }
         public DateTimeOffset? ExpirationDate { get; set; }
         public DateTimeOffset? Cancelled { get; set; }

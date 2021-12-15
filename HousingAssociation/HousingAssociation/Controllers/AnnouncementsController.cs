@@ -47,7 +47,8 @@ namespace HousingAssociation.Controllers
         [HttpPost("add-by-buildings")]
         public async Task<IActionResult> AddByBuildingsIds(AnnouncementDto announcement)
         {
-            return Ok(_announcementsService.AddAnnouncementByBuildingsIds(announcement));
+            await _announcementsService.AddAnnouncementByBuildingsIds(announcement);
+            return Ok();
         }
         
         // worker, admin

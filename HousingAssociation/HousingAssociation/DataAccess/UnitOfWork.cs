@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using HousingAssociation.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace HousingAssociation.DataAccess
 {
@@ -11,7 +12,6 @@ namespace HousingAssociation.DataAccess
         {
             Context = context;
         }
-
         public void Commit()
         {
             Context.SaveChanges();
@@ -20,6 +20,11 @@ namespace HousingAssociation.DataAccess
         public async Task CommitAsync()
         {
             await Context.SaveChangesAsync();
+        }
+
+        public void SetModified<T>(T entity)
+        {
+            Context.Entry(entity).State = EntityState.Modified;
         }
 
         private AddressesRepository _addressesRepository;

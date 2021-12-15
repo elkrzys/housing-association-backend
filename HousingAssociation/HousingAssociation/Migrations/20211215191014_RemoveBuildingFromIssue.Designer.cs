@@ -3,15 +3,17 @@ using System;
 using HousingAssociation.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace HousingAssociation.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211215191014_RemoveBuildingFromIssue")]
+    partial class RemoveBuildingFromIssue
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -259,6 +261,10 @@ namespace HousingAssociation.Migrations
                     b.Property<DateTimeOffset?>("Resolved")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("resolved");
+
+                    b.Property<int>("SourceBuildingId")
+                        .HasColumnType("integer")
+                        .HasColumnName("source_building_id");
 
                     b.Property<int?>("SourceLocalId")
                         .HasColumnType("integer")

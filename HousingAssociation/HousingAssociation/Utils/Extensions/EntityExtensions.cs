@@ -59,9 +59,9 @@ namespace HousingAssociation.Utils.Extensions
                 Content = issue.Content,
                 Cancelled = issue.Cancelled,
                 Resolved = issue.Resolved,
-                SourceBuildingId = issue.SourceBuildingId,
-                SourceLocalId = issue.SourceLocalId,
-                Address = issue.Building?.Address
+                SourceBuildingId = issue.Local.BuildingId,
+                SourceLocalId = issue.SourceLocalId ?? 0,
+                Address = issue.Local?.Building?.Address
             };
 
         public static LocalDto AsDto(this Local local)

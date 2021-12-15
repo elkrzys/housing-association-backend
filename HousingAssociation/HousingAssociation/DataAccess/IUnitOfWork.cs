@@ -16,5 +16,6 @@ namespace HousingAssociation.DataAccess
         IssuesRepository IssuesRepository { get; }
         void Commit();
         Task CommitAsync();
+        void SetModified<T>(T entity);
     }
 }
