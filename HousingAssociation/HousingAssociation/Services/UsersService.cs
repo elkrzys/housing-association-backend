@@ -5,20 +5,24 @@ using HousingAssociation.Controllers.Requests;
 using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.ExceptionHandling.Exceptions;
+using HousingAssociation.Models;
 using HousingAssociation.Models.DTOs;
 using HousingAssociation.Utils;
 using HousingAssociation.Utils.Extensions;
 using Microsoft.OpenApi.Expressions;
+using MimeKit;
 
 namespace HousingAssociation.Services
 {
     public class UsersService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly EmailService _emailService;
 
-        public UsersService(IUnitOfWork unitOfWork)
+        public UsersService(IUnitOfWork unitOfWork, EmailService emailService)
         {
             _unitOfWork = unitOfWork;
+            _emailService = emailService;
         }
 
         public async Task<List<UserDto>> FindUnconfirmedUsers()
@@ -58,21 +62,22 @@ namespace HousingAssociation.Services
             return user.AsDto();
         }
 
-        public async Task AddWorker(RegisterRequest request)
+        public async Task AddWorker(UserDto userDto)
         {
             var user = new User
             {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                PhoneNumber = request.PhoneNumber,
-                Email = request.Email,
+                FirstName = userDto.FirstName,
+                LastName = userDto.LastName,
+                PhoneNumber = userDto.PhoneNumber,
+                Email = userDto.Email,
                 Role = Role.Worker,
-                IsEnabled = false
+                IsEnabled = true
             };
             
-            var password = PasswordGenerator.CreateRandomPassword();
             user = await _unitOfWork.UsersRepository.AddIfNotExists(user) ??
                    throw new BadRequestException("User already exists");
+            
+            var password = PasswordGenerator.CreateRandomPassword();
 
             var credentials = new UserCredentials
             {
@@ -81,6 +86,7 @@ namespace HousingAssociation.Services
             };
             
             await _unitOfWork.UserCredentialsRepository.Add(credentials);
+            _emailService.SendEmail(PrepareMessageWithPassword(user, password));
             await _unitOfWork.CommitAsync();
         }
         
@@ -132,6 +138,18 @@ namespace HousingAssociation.Services
             _unitOfWork.UsersRepository.Delete(user);
         }
 
+        private MailMessage PrepareMessageWithPassword(User receiver, string password)
+        {
+            var from = new MailboxAddress("Wspólnota mieszkaniowa", _emailService.GetAppMailAddress);
+            return new MailMessage(from, new[] { MailboxAddress.Parse(receiver.Email) }, true)
+            {
+                Subject = "Rejestracja konta",
+                Message = $"<h1>Witaj {receiver.FirstName} {receiver.LastName}.</h1><br/>" +
+                          "Zostało dla ciebie utworzone konto pracownicze.<br/>" +
+                          $"<p>Aby się zalogować użyj tego hasła: <b>{password}</b></p>" +
+                          $"<p style=\"color:red\">Pamiętaj aby zmienić hasło po zalogowaniu!</p>"
+            };
+        }
         
     }
 }

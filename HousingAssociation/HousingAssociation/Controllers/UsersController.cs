@@ -35,9 +35,10 @@ namespace HousingAssociation.Controllers
             => Ok(await _usersService.FindAllWorkers());
 
         [HttpPost("add-worker")]
-        public async Task<IActionResult> AddNewWorker(RegisterRequest request)
+        public async Task<IActionResult> AddNewWorker(UserDto userDto)
         {
-            return null;
+            await _usersService.AddWorker(userDto);
+            return Ok();
         }
 
         [HttpPut("{id:int}")]

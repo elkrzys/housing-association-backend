@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Text;
-using System.Xml.Serialization;
 using HousingAssociation.Settings;
 using HousingAssociation.DataAccess;
 using HousingAssociation.ExceptionHandling;
@@ -101,6 +100,7 @@ namespace HousingAssociation
             services.AddScoped<AnnouncementsService>();
             services.AddScoped<IssuesService>();
             services.AddScoped<AuthenticationService>();
+            services.AddSingleton<EmailService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

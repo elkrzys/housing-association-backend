@@ -19,13 +19,14 @@ namespace HousingAssociation.Services
         {
             _mailSettings = mailSettings.Value;
         }
-
+        public string GetAppMailAddress => _mailSettings.User;
         public void SendEmail(MailMessage message)
         {
             var email = new MimeMessage();
             email.From.Add(message.From);
-            email.To.AddRange(message.Receivers.Select(MailboxAddress.Parse));
+            email.To.AddRange(message.Receivers);
             email.Subject = message.Subject;
+            
             email.Body = new TextPart(message.IsMessageHtml ? TextFormat.Html : TextFormat.Plain)
                 {Text = message.Message};
             
