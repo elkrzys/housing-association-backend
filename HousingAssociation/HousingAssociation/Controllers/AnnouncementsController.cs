@@ -18,15 +18,15 @@ namespace HousingAssociation.Controllers
 
         // worker, admin
         [HttpGet]
-        public async Task<IActionResult> GetAllAnnouncements() => Ok(_announcementsService.GetAll());
+        public async Task<IActionResult> GetAllAnnouncements() => Ok(await _announcementsService.GetAll());
         
         // resident
-        [HttpGet("{receiverId:int}")]
+        [HttpGet("receiver/{receiverId:int}")]
         public async Task<IActionResult> GetAllAnnouncementsByReceiverId(int receiverId)
             => Ok(await _announcementsService.GetAllByReceiverId(receiverId));
 
         // worker, admin
-        [HttpGet("{authorId:int}")]
+        [HttpGet("author/{authorId:int}")]
         public async Task<IActionResult> GetAllAnnouncementsByAuthorId(int authorId)
             => Ok(await _announcementsService.GetAllByAuthorId(authorId));
         
@@ -41,7 +41,8 @@ namespace HousingAssociation.Controllers
         [HttpPost("add-by-address")]
         public async Task<IActionResult> AddByAddress(AnnouncementDto announcement)
         {
-            return Ok(_announcementsService.AddAnnouncementByAddress(announcement));
+            await _announcementsService.AddAnnouncementByAddress(announcement);
+            return Ok();
         }
         
         [HttpPost("add-by-buildings")]
@@ -56,8 +57,10 @@ namespace HousingAssociation.Controllers
         public async Task<IActionResult> Update(int id, AnnouncementDto announcement)
         { 
             announcement.Id = id;
-            return Ok(_announcementsService.UpdateAnnouncement(announcement));
+            await _announcementsService.UpdateAnnouncement(announcement);
+            return Ok();
         }
+        
         // worker, admin
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Cancel(int id)

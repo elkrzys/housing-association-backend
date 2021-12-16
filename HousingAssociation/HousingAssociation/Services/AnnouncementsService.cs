@@ -36,7 +36,6 @@ namespace HousingAssociation.Services
                     _unitOfWork.SetModified(building);
                     buildings.Add(building);
                 }
-                    
             }
 
             if (!buildings.Any())
@@ -57,6 +56,7 @@ namespace HousingAssociation.Services
                 var buildingsFromAddress = await _unitOfWork.BuildingsRepository.FindByAddressAsync(address);
                 buildings = buildings.Concat(buildingsFromAddress).Distinct().ToList();
             }
+            buildings.ForEach(b => _unitOfWork.SetModified(b));
             await AddAnnouncementWithBuildings(announcementDto, buildings);
         }
 
@@ -176,8 +176,9 @@ namespace HousingAssociation.Services
                 ExpirationDate = announcementDto.ExpirationDate,
                 Type = announcementDto.Type
             };
-            // if (await _unitOfWork.AnnouncementsRepository.CheckIfExistsAsync(announcement))
-            //     throw new BadRequestException("Such announcement already exists.");
+            
+            if (await _unitOfWork.AnnouncementsRepository.CheckIfExistsAsync(announcement))
+                throw new BadRequestException("Such announcement already exists.");
             
             await _unitOfWork.AnnouncementsRepository.AddAsync(announcement);
             await _unitOfWork.CommitAsync();

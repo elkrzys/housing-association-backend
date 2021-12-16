@@ -14,16 +14,25 @@ namespace HousingAssociation.Repositories
         {
             _announcements = dbContext.Announcements;
         }
-        public async Task<bool> CheckIfExistsAsync(Announcement announcement, List<Building> buildings)
-            => await _announcements
+        public async Task<bool> CheckIfExistsAsync(Announcement announcement)
+        {
+            var similarAnnouncements =  await _announcements
                 .Include(a => a.TargetBuildings)
-                .AnyAsync(a =>
-                    a.Cancelled != null || a.Expired != null ||
-                    !buildings.Any() || 
-                    // !announcement.TargetBuildings.Any(b => a.TargetBuildings.Contains(b)) &&
-                    !a.Title.Equals(announcement.Title) &&
+                .Where(a =>
+                    a.Cancelled == null && a.Expired == null &&
+                    a.Title.Equals(announcement.Title) &&
                     a.Content.Equals(announcement.Content)
-                );
+                ).ToListAsync();
+            
+            if (!similarAnnouncements.Any())
+                return false;
+            
+            var value = similarAnnouncements.Any(a =>
+                a.TargetBuildings.Any(b => announcement.TargetBuildings.Any(b1 => b1.Id == b.Id)));
+
+            return value;
+        }
+
         public async Task AddAsync(Announcement announcement) => await _announcements.AddAsync(announcement);
         public void Update(Announcement announcement) => _announcements.Update(announcement);
         public void Delete(Announcement announcement) => _announcements.Remove(announcement);
