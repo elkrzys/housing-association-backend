@@ -1,4 +1,4 @@
-﻿namespace DataAccess.Settings
+﻿namespace HousingAssociation.Settings
 {
     public class DbSettings
     {

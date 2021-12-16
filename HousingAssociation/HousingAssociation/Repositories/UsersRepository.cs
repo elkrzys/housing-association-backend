@@ -40,23 +40,23 @@ namespace HousingAssociation.Repositories
             _users.Update(user);
         }
 
-        public async Task<User> FindById(int id) => await _users.FindAsync(id);
+        public async Task<User> FindByIdAsync(int id) => await _users.FindAsync(id);
         
-        public async Task<List<User>> FindByRole(Role role)
+        public async Task<List<User>> FindByRoleAsync(Role role)
             => await _users.Where(user => user.Role == role).ToListAsync();
         
-        public async Task<User> FindByIdAndIncludeAllLocals(int id)
+        public async Task<User> FindByIdAndIncludeAllLocalsAsync(int id)
             => await _users
                 .Include(u => u.ResidedLocals)
                 .Include(u => u.OwnedLocals)
                 .SingleAsync(u => u.Id == id);
 
-        public async Task<List<User>> FindAllNotEnabledUsers()
+        public async Task<List<User>> FindAllNotEnabledUsersAsync()
         {
             return await _users.Where(u => !u.IsEnabled).ToListAsync();
         }
 
-        public async Task<User> FindByRefreshToken(string token) 
+        public async Task<User> FindByRefreshTokenAsync(string token) 
             => await _users
                 .Include(u => u.RefreshTokens)
                 .SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));

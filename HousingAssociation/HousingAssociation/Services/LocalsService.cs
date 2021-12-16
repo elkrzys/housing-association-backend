@@ -50,7 +50,7 @@ namespace HousingAssociation.Services
         public async Task AddResidentToLocal(int localId, int residentId)
         {
             var local = await _unitOfWork.LocalsRepository.FindByIdAsync(localId) ?? throw new NotFoundException();
-            var resident = await _unitOfWork.UsersRepository.FindById(residentId) ?? throw new NotFoundException();
+            var resident = await _unitOfWork.UsersRepository.FindByIdAsync(residentId) ?? throw new NotFoundException();
             
             local.Residents.Add(resident);
             _unitOfWork.LocalsRepository.Update(local);
@@ -60,7 +60,7 @@ namespace HousingAssociation.Services
         public async Task RemoveResidentFromLocal(int localId, int residentId)
         {
             var local = await _unitOfWork.LocalsRepository.FindByIdAsync(localId) ?? throw new NotFoundException();
-            var resident = await _unitOfWork.UsersRepository.FindById(residentId) ?? throw new NotFoundException();
+            var resident = await _unitOfWork.UsersRepository.FindByIdAsync(residentId) ?? throw new NotFoundException();
             
             local.Residents.Remove(resident);
             _unitOfWork.LocalsRepository.Update(local);

@@ -88,7 +88,7 @@ namespace HousingAssociation.Services
         
         public async Task<LoginResponse> RefreshToken(string token)
         {
-            var user = await _unitOfWork.UsersRepository.FindByRefreshToken(token) ??
+            var user = await _unitOfWork.UsersRepository.FindByRefreshTokenAsync(token) ??
                        throw new BadRequestException("Invalid token");
             
             var refreshToken = user.RefreshTokens.Single(x => x.Token == token);
@@ -123,7 +123,7 @@ namespace HousingAssociation.Services
         
         public async Task RevokeToken(string token)
         {
-            var user = await _unitOfWork.UsersRepository.FindByRefreshToken(token) ??
+            var user = await _unitOfWork.UsersRepository.FindByRefreshTokenAsync(token) ??
                        throw new BadRequestException("Invalid token");
             
             var refreshToken = user.RefreshTokens.Single(x => x.Token == token);

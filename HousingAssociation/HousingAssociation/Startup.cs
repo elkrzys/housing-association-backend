@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Xml.Serialization;
-using DataAccess.Settings;
+using HousingAssociation.Settings;
 using HousingAssociation.DataAccess;
 using HousingAssociation.ExceptionHandling;
 using HousingAssociation.Repositories;
@@ -53,6 +53,7 @@ namespace HousingAssociation
             
             // Jwt configuration v1
             //services.Configure<JwtConfig>(Configuration.GetSection("JwtConfig"));
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
             
             // Jwt configuration v1
             var jwtConfig = Configuration.GetSection("JwtConfig").Get<JwtConfig>();

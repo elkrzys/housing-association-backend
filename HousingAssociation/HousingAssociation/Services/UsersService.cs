@@ -6,6 +6,7 @@ using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.ExceptionHandling.Exceptions;
 using HousingAssociation.Models.DTOs;
+using HousingAssociation.Utils;
 using HousingAssociation.Utils.Extensions;
 using Microsoft.OpenApi.Expressions;
 
@@ -22,7 +23,7 @@ namespace HousingAssociation.Services
 
         public async Task<List<UserDto>> FindUnconfirmedUsers()
         {
-            var users = await _unitOfWork.UsersRepository.FindAllNotEnabledUsers();
+            var users = await _unitOfWork.UsersRepository.FindAllNotEnabledUsersAsync();
             List<UserDto> usersDtos = new();
             users.ForEach(u => usersDtos.Add(u.AsDto()));
             return usersDtos;
@@ -30,7 +31,7 @@ namespace HousingAssociation.Services
         
         public async Task<List<UserDto>> FindAllResidents()
         {
-            var users = await _unitOfWork.UsersRepository.FindByRole(Role.Resident);
+            var users = await _unitOfWork.UsersRepository.FindByRoleAsync(Role.Resident);
             List<UserDto> usersDtos = new();
             users.ForEach(u => usersDtos.Add(u.AsDto()));
             return usersDtos;
@@ -38,16 +39,16 @@ namespace HousingAssociation.Services
         
         public async Task<List<UserDto>> FindAllWorkers()
         {
-            var users = await _unitOfWork.UsersRepository.FindByRole(Role.Worker);
+            var users = await _unitOfWork.UsersRepository.FindByRoleAsync(Role.Worker);
             List<UserDto> usersDtos = new();
             users.ForEach(u => usersDtos.Add(u.AsDto()));
             return usersDtos;
         }
         
-        public async Task<UserDto> FindUserById(int id) => (await _unitOfWork.UsersRepository.FindById(id)).AsDto();
+        public async Task<UserDto> FindUserById(int id) => (await _unitOfWork.UsersRepository.FindByIdAsync(id)).AsDto();
         public async Task<UserDto> ConfirmUser(int id)
         {
-            var user = await _unitOfWork.UsersRepository.FindById(id);
+            var user = await _unitOfWork.UsersRepository.FindByIdAsync(id);
             if (user is null)
                 throw new BadRequestException();
             
@@ -69,13 +70,23 @@ namespace HousingAssociation.Services
                 IsEnabled = false
             };
             
-            // TODO: generate worker credentials
-            user = await _unitOfWork.UsersRepository.AddIfNotExists(user);
+            var password = PasswordGenerator.CreateRandomPassword();
+            user = await _unitOfWork.UsersRepository.AddIfNotExists(user) ??
+                   throw new BadRequestException("User already exists");
+
+            var credentials = new UserCredentials
+            {
+                User = user,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password)
+            };
+            
+            await _unitOfWork.UserCredentialsRepository.Add(credentials);
+            await _unitOfWork.CommitAsync();
         }
         
         public async Task Update(UserDto userDto)
         {
-            var user = await _unitOfWork.UsersRepository.FindById(userDto.Id);
+            var user = await _unitOfWork.UsersRepository.FindByIdAsync(userDto.Id);
             if (user is null)
                 throw new BadRequestException($"User with id {userDto.Id} doesn't exist");
             
@@ -88,7 +99,7 @@ namespace HousingAssociation.Services
                 Role = userDto.Role ?? user.Role,
                 IsEnabled = userDto.IsEnabled ?? user.IsEnabled
             });
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
         }
 
         public async Task ChangePassword(int userId, ChangePasswordRequest request)
@@ -101,12 +112,20 @@ namespace HousingAssociation.Services
                 throw new BadRequestException("Old password not valid");
             
             _unitOfWork.UserCredentialsRepository.Update(credentials with {PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword)});
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
+        }
+
+        public async Task DisableUser(UserDto userDto)
+        {
+            var user = await _unitOfWork.UsersRepository.FindByIdAsync(userDto.Id) ?? throw new NotFoundException();
+            
+            _unitOfWork.UsersRepository.Update(user with {IsEnabled = false});
+            await _unitOfWork.CommitAsync();
         }
         
         public async Task DeleteUser(int id)
         {
-            var user = await _unitOfWork.UsersRepository.FindById(id);
+            var user = await _unitOfWork.UsersRepository.FindByIdAsync(id);
             if (user is null)
                 throw new BadRequestException($"User with id {id} doesn't exist");
             

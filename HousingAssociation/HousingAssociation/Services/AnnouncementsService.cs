@@ -115,7 +115,7 @@ namespace HousingAssociation.Services
 
         public async Task<List<AnnouncementDto>> GetAllByReceiverId(int receiverId)
         {
-            var receiver = await _unitOfWork.UsersRepository.FindByIdAndIncludeAllLocals(receiverId) 
+            var receiver = await _unitOfWork.UsersRepository.FindByIdAndIncludeAllLocalsAsync(receiverId) 
                            ?? throw new NotFoundException();
 
             var receiverLocals = receiver.ResidedLocals

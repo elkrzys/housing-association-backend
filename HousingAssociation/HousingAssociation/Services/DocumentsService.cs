@@ -106,7 +106,7 @@ namespace HousingAssociation.Services
         private async Task<List<User>> GetReceiversByIds(List<int> ids)
         {
             List<User> receivers = new();
-            ids.ForEach(async id => receivers.Add(await _unitOfWork.UsersRepository.FindById(id)));
+            ids.ForEach(async id => receivers.Add(await _unitOfWork.UsersRepository.FindByIdAsync(id)));
             return receivers;
         }
 

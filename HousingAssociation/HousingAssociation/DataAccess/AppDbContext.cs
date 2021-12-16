@@ -1,5 +1,4 @@
 ﻿using System;
-using DataAccess.Settings;
 using HousingAssociation.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 
