@@ -37,7 +37,14 @@ namespace HousingAssociation.Controllers
         [HttpPost("add-worker")]
         public async Task<IActionResult> AddNewWorker(UserDto userDto)
         {
-            await _usersService.AddWorker(userDto);
+            return Ok(await _usersService.AddWorker(userDto));
+        }
+
+        [HttpPut("unregister/{id:int}")]
+        public async Task<IActionResult> UnregisterUser(int id, UserDto userDto)
+        {
+            userDto.Id = id;
+            await _usersService.DisableUser(userDto);
             return Ok();
         }
 

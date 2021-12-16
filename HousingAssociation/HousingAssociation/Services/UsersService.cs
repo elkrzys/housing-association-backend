@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using HousingAssociation.Controllers.Requests;
 using HousingAssociation.DataAccess;
@@ -28,25 +29,19 @@ namespace HousingAssociation.Services
         public async Task<List<UserDto>> FindUnconfirmedUsers()
         {
             var users = await _unitOfWork.UsersRepository.FindAllNotEnabledUsersAsync();
-            List<UserDto> usersDtos = new();
-            users.ForEach(u => usersDtos.Add(u.AsDto()));
-            return usersDtos;
+            return GetUsersAsDtos(users);
         }
         
         public async Task<List<UserDto>> FindAllResidents()
         {
             var users = await _unitOfWork.UsersRepository.FindByRoleAsync(Role.Resident);
-            List<UserDto> usersDtos = new();
-            users.ForEach(u => usersDtos.Add(u.AsDto()));
-            return usersDtos;
+            return GetUsersAsDtos(users);
         }
         
         public async Task<List<UserDto>> FindAllWorkers()
         {
             var users = await _unitOfWork.UsersRepository.FindByRoleAsync(Role.Worker);
-            List<UserDto> usersDtos = new();
-            users.ForEach(u => usersDtos.Add(u.AsDto()));
-            return usersDtos;
+            return GetUsersAsDtos(users);
         }
         
         public async Task<UserDto> FindUserById(int id) => (await _unitOfWork.UsersRepository.FindByIdAsync(id)).AsDto();
@@ -57,12 +52,12 @@ namespace HousingAssociation.Services
                 throw new BadRequestException();
             
             _unitOfWork.UsersRepository.Update(user with {IsEnabled = true});
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
             
             return user.AsDto();
         }
 
-        public async Task AddWorker(UserDto userDto)
+        public async Task<UserDto> AddWorker(UserDto userDto)
         {
             var user = new User
             {
@@ -88,6 +83,8 @@ namespace HousingAssociation.Services
             await _unitOfWork.UserCredentialsRepository.Add(credentials);
             _emailService.SendEmail(PrepareMessageWithPassword(user, password));
             await _unitOfWork.CommitAsync();
+            
+            return user.AsDto();
         }
         
         public async Task Update(UserDto userDto)
@@ -120,7 +117,6 @@ namespace HousingAssociation.Services
             _unitOfWork.UserCredentialsRepository.Update(credentials with {PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword)});
             await _unitOfWork.CommitAsync();
         }
-
         public async Task DisableUser(UserDto userDto)
         {
             var user = await _unitOfWork.UsersRepository.FindByIdAsync(userDto.Id) ?? throw new NotFoundException();
@@ -128,7 +124,6 @@ namespace HousingAssociation.Services
             _unitOfWork.UsersRepository.Update(user with {IsEnabled = false});
             await _unitOfWork.CommitAsync();
         }
-        
         public async Task DeleteUser(int id)
         {
             var user = await _unitOfWork.UsersRepository.FindByIdAsync(id);
@@ -137,6 +132,8 @@ namespace HousingAssociation.Services
             
             _unitOfWork.UsersRepository.Delete(user);
         }
+        
+        private List<UserDto> GetUsersAsDtos(List<User> users) => users.Select(user => user.AsDto()).ToList();
 
         private MailMessage PrepareMessageWithPassword(User receiver, string password)
         {

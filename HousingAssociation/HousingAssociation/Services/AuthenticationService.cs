@@ -25,7 +25,6 @@ namespace HousingAssociation.Services
         
         public async Task<User> RegisterUser(RegisterRequest request)
         {
-            //TODO: change user Role to selected one from request
             var user = new User
             {
                 FirstName = request.FirstName,
@@ -45,9 +44,8 @@ namespace HousingAssociation.Services
             };
             
             await _unitOfWork.UserCredentialsRepository.Add(credentials);
-            _unitOfWork.Commit();
-
-            //TODO: return result as JSONResult or something like this
+            await _unitOfWork.CommitAsync();
+            
             return user;
         }
         
@@ -62,6 +60,9 @@ namespace HousingAssociation.Services
             if (!BCrypt.Net.BCrypt.Verify(request.Password, passwordHash))
                 throw new BadRequestException("Email or password incorrect");
 
+            if (!user.IsEnabled)
+                throw new BadRequestException("User is not enabled");
+
             // authentication successful so generate jwt and refresh tokens
             var jwtToken = _jwtUtils.GenerateJwtToken(user);
             var refreshToken = _jwtUtils.GenerateRefreshToken();
@@ -72,7 +73,7 @@ namespace HousingAssociation.Services
 
             // save changes to db
             _unitOfWork.UsersRepository.Update(user);
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
 
             return new LoginResponse(user, jwtToken, refreshToken.Token);
         }
@@ -83,7 +84,7 @@ namespace HousingAssociation.Services
             if (user is null || !user.PhoneNumber.Equals(request.PhoneNumber))
                 throw new NotFoundException();
             user.UserCredentials.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
         }
         
         public async Task<LoginResponse> RefreshToken(string token)
@@ -98,7 +99,7 @@ namespace HousingAssociation.Services
                 // revoke all descendant tokens in case this token has been compromised
                 RevokeDescendantRefreshTokens(refreshToken, user, $"Attempted reuse of revoked ancestor token: {token}");
                 _unitOfWork.UsersRepository.Update(user);
-                _unitOfWork.Commit();
+                await _unitOfWork.CommitAsync();
             }
 
             if (!refreshToken.IsActive)
@@ -113,7 +114,7 @@ namespace HousingAssociation.Services
 
             // save changes to db
             _unitOfWork.UsersRepository.Update(user);
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
 
             // generate new jwt
             var jwtToken = _jwtUtils.GenerateJwtToken(user);
@@ -134,7 +135,7 @@ namespace HousingAssociation.Services
             // revoke token and save
             RevokeRefreshToken(refreshToken, "Revoked without replacement");
             _unitOfWork.UsersRepository.Update(user);
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
         }
         
         private void RemoveOldRefreshTokens(User user)
