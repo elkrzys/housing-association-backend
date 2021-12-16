@@ -17,7 +17,7 @@ namespace HousingAssociation.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllNotCancelled() => Ok(await _issuesService.GetAllNotCancelled());
+        public async Task<IActionResult> GetAllNotCancelled() => Ok(await _issuesService.GetAllActual());
         
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id) => Ok(await _issuesService.GetById(id));

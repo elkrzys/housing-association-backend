@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using HousingAssociation.Repositories;
 
@@ -17,5 +17,6 @@ namespace HousingAssociation.DataAccess
         void Commit();
         Task CommitAsync();
         void SetModified<T>(T entity);
+        void SetModified<T>(List<T> entities);
     }
 }

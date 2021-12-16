@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using HousingAssociation.Controllers.Requests;
 using HousingAssociation.DataAccess;
@@ -11,6 +12,7 @@ using HousingAssociation.Utils;
 using HousingAssociation.Utils.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Serilog;
 
 namespace HousingAssociation.Services
 {
@@ -24,22 +26,47 @@ namespace HousingAssociation.Services
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
         }
-
-        public async Task<DocumentDto> FindById(int id)
-            => (await _unitOfWork.DocumentsRepository.FindByIdAsync(id)).AsDto() ?? throw new NotFoundException();
         
+        public async Task<DocumentDto> FindById(int id)
+        {
+            var document = await _unitOfWork.DocumentsRepository.FindByIdAsync(id);
+            if (document is null)
+            {
+                Log.Warning($"Document with id = {id} doesn't exist.");
+                throw new NotFoundException();
+            }
+            return document.AsDto();
+        }
+
         public async Task<List<DocumentDto>> FindAll()
         {
-            // TODO: add refresh method to remove all files that are older than their expiration date
             var documents = await _unitOfWork.DocumentsRepository.FindAllAsync();
+            documents = await DeleteExpiredDocuments(documents);
             return DocumentsToDocumentsDtos(documents);
         }
 
         public async Task<List<DocumentDto>> FindAllByAuthorId(int authorId)
         {
-            var documents = await _unitOfWork.DocumentsRepository.FindAllByAuthorIdAsync(authorId) ??
-                            throw new NotFoundException();
-            
+            var author = await _unitOfWork.UsersRepository.FindByIdAsync(authorId);
+            if (author is null)
+            {
+                Log.Warning($"User with id = {authorId} doesn't exist.");
+                throw new NotFoundException();
+            }
+
+            var documents = await _unitOfWork.DocumentsRepository.FindAllByAuthorIdAsync(authorId);
+            return DocumentsToDocumentsDtos(documents);
+        }
+
+        public async Task<List<DocumentDto>> FindAllByReceiverId(int receiverId)
+        {
+            var receiver = await _unitOfWork.UsersRepository.FindByIdAsync(receiverId);
+            if (receiver is null)
+            {
+                Log.Warning($"User with id = {receiverId} doesn't exist.");
+                throw new NotFoundException();
+            }
+            var documents = await _unitOfWork.DocumentsRepository.FindAllByReceiverAsync(receiverId);
             return DocumentsToDocumentsDtos(documents);
         }
 
@@ -48,6 +75,9 @@ namespace HousingAssociation.Services
             CheckIfDocumentFileIsValidOrThrowBadRequest(request.DocumentFile);
             var documentMd5 = await GetMd5IfDocumentNotExists(request.DocumentFile);
             var documentReceivers = await GetReceiversByIds(request.ReceiversIds);
+            
+            _unitOfWork.SetModified(documentReceivers);
+
             var path = await SaveFileAndReturnPath(request.DocumentFile);
             
             var document = new Document
@@ -61,27 +91,27 @@ namespace HousingAssociation.Services
                 Filepath = path
             };
             await _unitOfWork.DocumentsRepository.AddAsync(document);
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
         }
 
         private void CheckIfDocumentFileIsValidOrThrowBadRequest(IFormFile documentFile)
         {
-            // TODO: check if document is pdf
             if (documentFile is null || documentFile.Length == 0)
+            {
+                Log.Warning($"Attempt to upload an empty file.");
                 throw new BadRequestException("Request must include a valid document");
-
+            }
             var extension = Path.GetExtension(documentFile.FileName);
             
             if (string.IsNullOrEmpty(extension) || extension != ".pdf")
+            {
+                Log.Warning($"Attempt to upload file with extension: {extension}");
                 throw new BadRequestException("Request must include a valid document");
+            }
         }
         
-        private List<DocumentDto> DocumentsToDocumentsDtos(List<Document> documents)
-        {
-            List<DocumentDto> documentsDtos = new();
-            documents.ForEach(document => documentsDtos.Add(document.AsDto()));
-            return documentsDtos;
-        }
+        private List<DocumentDto> DocumentsToDocumentsDtos(List<Document> documents) 
+            => documents.Select(document => document.AsDto()).ToList();
 
         private async Task<string> GetMd5IfDocumentNotExists(IFormFile documentFile)
         {
@@ -97,7 +127,10 @@ namespace HousingAssociation.Services
                 {
                     currentDocHash = HashGenerator.CalculateMd5StringFromBytes(fileBytes);
                     if(hash.Equals(currentDocHash))
+                    {
+                        Log.Warning($"File with exact hash already exists.");
                         throw new BadRequestException("File already exists");
+                    }
                 });
             }
             return currentDocHash;
@@ -106,7 +139,10 @@ namespace HousingAssociation.Services
         private async Task<List<User>> GetReceiversByIds(List<int> ids)
         {
             List<User> receivers = new();
-            ids.ForEach(async id => receivers.Add(await _unitOfWork.UsersRepository.FindByIdAsync(id)));
+            foreach (var id in ids)
+            {
+                receivers.Add(await _unitOfWork.UsersRepository.FindByIdAsync(id));
+            }
             return receivers;
         }
 
@@ -128,11 +164,23 @@ namespace HousingAssociation.Services
             var path = document.Filepath;
             
             _unitOfWork.DocumentsRepository.DeleteDocument(document);
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
             
             if (File.Exists(path))
                 File.Delete(path);
         }
 
+        private async Task<List<Document>> DeleteExpiredDocuments(List<Document> documents)
+        {
+            var expiredDocuments = documents.Where(d =>
+                d.DaysToExpire != null && DateTimeOffset.Now > d.Created.AddDays(d.DaysToExpire!.Value)).ToList();
+            documents.RemoveAll(d => expiredDocuments.Any(expired => expired.Id == d.Id));
+            Log.Information($"Removed {expiredDocuments.Count} expired files");
+            foreach (var expired in expiredDocuments)
+            {
+                await DeleteById(expired.Id);
+            }
+            return documents;
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using HousingAssociation.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +26,10 @@ namespace HousingAssociation.DataAccess
         public void SetModified<T>(T entity)
         {
             Context.Entry(entity).State = EntityState.Modified;
+        }
+        public void SetModified<T>(List<T> entities)
+        {
+            entities.ForEach(entity => Context.Entry(entity).State = EntityState.Modified);
         }
 
         private AddressesRepository _addressesRepository;

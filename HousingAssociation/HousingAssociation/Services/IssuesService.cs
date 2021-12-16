@@ -7,6 +7,7 @@ using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.ExceptionHandling.Exceptions;
 using HousingAssociation.Models.DTOs;
 using HousingAssociation.Utils.Extensions;
+using Serilog;
 
 namespace HousingAssociation.Services
 {
@@ -22,6 +23,7 @@ namespace HousingAssociation.Services
         {
             if (await _unitOfWork.IssuesRepository.CheckIfExistsAsync(issueDto))
             {
+                Log.Warning($"Issue already exists.");
                 throw new BadRequestException("Issue already exists");
             }
             var issue = new Issue
@@ -41,7 +43,7 @@ namespace HousingAssociation.Services
             return issue.AsDto();
         }
         
-        public async Task<List<IssueDto>> GetAllNotCancelled()
+        public async Task<List<IssueDto>> GetAllActual()
         {
             var issues = await _unitOfWork.IssuesRepository.FindAllNotCancelledAsync();
             return GetIssuesAsDtos(issues);
@@ -55,14 +57,25 @@ namespace HousingAssociation.Services
         
         public async Task CancelIssue(int id)
         {
-            var issue = await _unitOfWork.IssuesRepository.FindByIdAsync(id) ?? throw new NotFoundException();
+            var issue = await _unitOfWork.IssuesRepository.FindByIdAsync(id);
+            
+            if(issue is null)
+            {
+                Log.Information($"Issue with id = {id} doesn't exist.");
+                throw new NotFoundException();
+            }
             _unitOfWork.IssuesRepository.Update(issue with {Cancelled = DateTimeOffset.Now});
             await _unitOfWork.CommitAsync();
         }
         
         public async Task ResolveIssue(int id)
         {
-            var issue = await _unitOfWork.IssuesRepository.FindByIdAsync(id) ?? throw new NotFoundException();
+            var issue = await _unitOfWork.IssuesRepository.FindByIdAsync(id);
+            if (issue is null)
+            {
+                Log.Warning($"Issue with id = {id} doesn't exist.");
+                throw new NotFoundException();
+            }
             _unitOfWork.IssuesRepository.Update(issue with {Resolved = DateTimeOffset.Now});
             await _unitOfWork.CommitAsync();
         }

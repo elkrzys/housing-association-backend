@@ -3,6 +3,7 @@ using HousingAssociation.ExceptionHandling.Exceptions;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace HousingAssociation.ExceptionHandling
 {
@@ -54,17 +55,18 @@ namespace HousingAssociation.ExceptionHandling
                         });
                         break;
                     default:
-                        //Log.Error(exception, $"{ exception.Message } at { exception.Source }.");
-                        throw exception;
+                        Log.Error(exception, $"{ exception.Message } at { exception.Source }.");
                         context.Response.ContentType = "application/json";
                         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                        await context.Response.WriteAsJsonAsync(new
-                        {
-                            //context.Response.StatusCode,
-                            exception.Message,
-                            exception.Source
-                        });
                         break;
+                    // context.Response.ContentType = "application/json";
+                        // context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        // await context.Response.WriteAsJsonAsync(new
+                        // {
+                        //     //context.Response.StatusCode,
+                        //     exception.Message,
+                        //     exception.Source
+                        // });
             }
 
             // if(exceptionType == typeof(NotFoundException))

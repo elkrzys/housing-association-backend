@@ -32,7 +32,7 @@ namespace HousingAssociation.Repositories
                 await _users.AddAsync(user);
                 return user;
             }
-            return null;
+            return existingUser;
         }
 
         public void Update(User user)
@@ -49,7 +49,7 @@ namespace HousingAssociation.Repositories
             => await _users
                 .Include(u => u.ResidedLocals)
                 .Include(u => u.OwnedLocals)
-                .SingleAsync(u => u.Id == id);
+                .SingleOrDefaultAsync(u => u.Id == id);
 
         public async Task<List<User>> FindAllNotEnabledUsersAsync()
         {

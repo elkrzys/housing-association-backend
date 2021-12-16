@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.ExceptionHandling.Exceptions;
 using HousingAssociation.Models.DTOs;
 using HousingAssociation.Utils.Extensions;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Serilog;
 
 namespace HousingAssociation.Services
 {
@@ -20,9 +19,12 @@ namespace HousingAssociation.Services
 
         public async Task AddLocal(LocalDto localDto)
         {
-            if (localDto is null) 
+            if (localDto is null)
+            {
+                Log.Warning("LocalDto is null");
                 throw new BadRequestException("Local mustn't be null.");
-
+            }
+            
             var local = new Local
             {
                 Number = localDto.Number,
@@ -32,8 +34,10 @@ namespace HousingAssociation.Services
             };
 
             if (await _unitOfWork.LocalsRepository.CheckIfExists(local))
+            {
+                Log.Warning($"Local already exists");
                 throw new BadRequestException("Local already exists");
-
+            }
             await _unitOfWork.LocalsRepository.AddAsync(local);
             await _unitOfWork.CommitAsync();
         }
@@ -41,7 +45,10 @@ namespace HousingAssociation.Services
         public async Task<List<LocalDto>> FindAllFromBuilding(int buildingId)
         {
             if(await _unitOfWork.BuildingsRepository.FindByIdWithAddressAsync(buildingId) is null)
+            {
+                Log.Warning($"Building with id = {buildingId} doesn't exist.");
                 throw new BadRequestException("Building doesn't exists.");
+            }
             
             var locals= await _unitOfWork.LocalsRepository.FindAllByBuildingIdAsync(buildingId);
             return GetLocalsAsDtos(locals);
@@ -88,7 +95,12 @@ namespace HousingAssociation.Services
 
         public async Task DeleteLocalById(int id)
         {
-            var local = await _unitOfWork.LocalsRepository.FindByIdAsync(id) ?? throw new BadRequestException("Local doesn't exist");
+            var local = await _unitOfWork.LocalsRepository.FindByIdAsync(id);
+            if (local is null)
+            {
+                Log.Warning($"Local with id = {id} doesn't exist.");
+                throw new BadRequestException("Local doesn't exist");
+            }
             _unitOfWork.LocalsRepository.Delete(local);
             await _unitOfWork.CommitAsync();
         }

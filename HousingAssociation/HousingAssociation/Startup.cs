@@ -19,6 +19,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace HousingAssociation
 {
@@ -28,6 +29,11 @@ namespace HousingAssociation
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            
+            string logsPath = $"{env.ContentRootPath}/logs";
+            if (!Directory.Exists(logsPath)) {
+                Directory.CreateDirectory(logsPath);
+            }
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -42,6 +48,9 @@ namespace HousingAssociation
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            Log.Logger= new LoggerConfiguration().ReadFrom.Configuration(Configuration).CreateLogger();
+            Log.Information("Application is starting.");
+            
             services.AddControllers()
                 .AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
@@ -115,13 +124,20 @@ namespace HousingAssociation
                     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Housing Association v1"));
                 }
             }
+
+            string documentsPath = $"{env.ContentRootPath}/wwwroot/documents";
+           
+            if (!Directory.Exists(documentsPath)) {
+                Directory.CreateDirectory(documentsPath);
+            }
+           
             
-            // app.UseStaticFiles(new StaticFileOptions
-            // {
-            //     FileProvider = new PhysicalFileProvider(
-            //         Path.Combine(env.WebRootPath, "documents")),
-            //     RequestPath = "/documents"
-            // });
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(env.WebRootPath, "documents")),
+                RequestPath = "/documents"
+            });
             
             // app.UseDirectoryBrowser(new DirectoryBrowserOptions
             // {
@@ -136,7 +152,8 @@ namespace HousingAssociation
                 .AllowAnyHeader()
                 .AllowCredentials());
             
-            //app.UseMiddleware<ExceptionHandlingMiddleware>();
+            app.UseSerilogRequestLogging();
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
             //app.UseMiddleware<JwtMiddleware>();
             app.UseRouting();
             

@@ -1,10 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using HousingAssociation.Controllers.Requests;
 using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.ExceptionHandling.Exceptions;
 using HousingAssociation.Models.DTOs;
 using HousingAssociation.Utils.Extensions;
+using Serilog;
 
 namespace HousingAssociation.Services
 {
@@ -39,6 +43,13 @@ namespace HousingAssociation.Services
                 building.Address = address;
             }
 
+            var exists = await _unitOfWork.BuildingsRepository.CheckIfExistsAsync(building);
+            if (exists)
+            {
+                Log.Warning("Building already exists.");
+                throw new BadRequestException("Building already exists.");
+            }
+            
             await _unitOfWork.BuildingsRepository.AddAsync(building);
             await _unitOfWork.CommitAsync();
         }
@@ -50,23 +61,46 @@ namespace HousingAssociation.Services
 
         public async Task Update(BuildingDto buildingDto)
         {
-          
+            if (buildingDto.Id is null)
+            {
+                Log.Warning("Building Id can't be null.");
+                throw new BadRequestException("Building Id can't be null");
+            }
+
+            var building = await _unitOfWork.BuildingsRepository.FindByIdWithLocalsAsync(buildingDto.Id!.Value);
+            var newAddress = await _unitOfWork.AddressesRepository.AddNewAddressOrReturnExisting(buildingDto.Address);
+            
+            if (newAddress.Id != 0)
+            {
+                building.Address = null;
+                building.AddressId = newAddress.Id;
+            }
+            else
+            {
+                building.Address = newAddress;
+            }
+            
+            _unitOfWork.BuildingsRepository.Update(building with
+            {
+                Number = buildingDto.Number, Type = buildingDto.Type
+            });
             await _unitOfWork.CommitAsync();
         }
 
         public async Task DeleteById(int id)
         {
-            var building = await _unitOfWork.BuildingsRepository.FindByIdWithAddressAsync(id) ?? throw new NotFoundException();
+            var building = await _unitOfWork.BuildingsRepository.FindByIdWithAddressAsync(id);
+            if(building is null)
+            {
+                Log.Warning($"Building with id = {id} doesn't exist.");
+                throw new NotFoundException();
+            }
             _unitOfWork.BuildingsRepository.Delete(building);
             await _unitOfWork.CommitAsync();
         }
 
-        private List<BuildingDto> GetBuildingsAsDtos(List<Building> buildings)
-        {
-            List<BuildingDto> buildingDtos = new();
-            buildings.ForEach(building => buildingDtos.Add(building.AsDto()));
-            return buildingDtos;
-        }
-        
+        private List<BuildingDto> GetBuildingsAsDtos(IEnumerable<Building> buildings)
+            => buildings.Select(building => building.AsDto()).ToList();
+
     }
 }

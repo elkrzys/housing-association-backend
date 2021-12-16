@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using HousingAssociation.Utils;
 using HousingAssociation.Utils.Extensions;
 using Microsoft.OpenApi.Expressions;
 using MimeKit;
+using Serilog;
 
 namespace HousingAssociation.Services
 {
@@ -43,13 +45,15 @@ namespace HousingAssociation.Services
             var users = await _unitOfWork.UsersRepository.FindByRoleAsync(Role.Worker);
             return GetUsersAsDtos(users);
         }
-        
         public async Task<UserDto> FindUserById(int id) => (await _unitOfWork.UsersRepository.FindByIdAsync(id)).AsDto();
         public async Task<UserDto> ConfirmUser(int id)
         {
             var user = await _unitOfWork.UsersRepository.FindByIdAsync(id);
             if (user is null)
-                throw new BadRequestException();
+            {
+                Log.Warning($"User with id = {id} doesn't exist.");
+                throw new NotFoundException();
+            }
             
             _unitOfWork.UsersRepository.Update(user with {IsEnabled = true});
             await _unitOfWork.CommitAsync();
@@ -68,9 +72,13 @@ namespace HousingAssociation.Services
                 Role = Role.Worker,
                 IsEnabled = true
             };
-            
-            user = await _unitOfWork.UsersRepository.AddIfNotExists(user) ??
-                   throw new BadRequestException("User already exists");
+
+            user = await _unitOfWork.UsersRepository.AddIfNotExists(user);
+            if (user.Id != 0)
+            {
+                Log.Warning($"User with id = {user.Id} already exists.");
+                throw new BadRequestException("User already exists");
+            }
             
             var password = PasswordGenerator.CreateRandomPassword();
 
@@ -81,9 +89,16 @@ namespace HousingAssociation.Services
             };
             
             await _unitOfWork.UserCredentialsRepository.Add(credentials);
-            _emailService.SendEmail(PrepareMessageWithPassword(user, password));
-            await _unitOfWork.CommitAsync();
-            
+            try
+            {
+                _emailService.SendEmail(PrepareMessageWithPassword(user, password));
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception exception)
+            {
+                Log.Error($"Problem while attempt to send email to user {user.Id}.");
+                Log.Error(exception, $"{ exception.Message } at { exception.Source }.");
+            }
             return user.AsDto();
         }
         
@@ -91,7 +106,10 @@ namespace HousingAssociation.Services
         {
             var user = await _unitOfWork.UsersRepository.FindByIdAsync(userDto.Id);
             if (user is null)
-                throw new BadRequestException($"User with id {userDto.Id} doesn't exist");
+            {
+                Log.Warning($"User with id = {userDto.Id} doesn't exist.");
+                throw new NotFoundException();
+            }
             
             _unitOfWork.UsersRepository.Update(user with
             {
@@ -109,17 +127,31 @@ namespace HousingAssociation.Services
         {
             var credentials = await _unitOfWork.UserCredentialsRepository.FindByUserId(userId);
             if (credentials is null)
-                throw new BadRequestException("User doesn't exist");
-                    
-            if(!BCrypt.Net.BCrypt.Verify(request.OldPassword, credentials.PasswordHash))
+            {
+                Log.Error($"User with id = {userId} doesn't exist.");
+                throw new NotFoundException();
+            }
+            if (!BCrypt.Net.BCrypt.Verify(request.OldPassword, credentials.PasswordHash))
+            {
+                Log.Warning($"User with id = {userId} didn't match old password.");
                 throw new BadRequestException("Old password not valid");
+            }
             
-            _unitOfWork.UserCredentialsRepository.Update(credentials with {PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword)});
+            _unitOfWork.UserCredentialsRepository.Update(credentials with
+            {
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword)
+            });
             await _unitOfWork.CommitAsync();
         }
         public async Task DisableUser(UserDto userDto)
         {
-            var user = await _unitOfWork.UsersRepository.FindByIdAsync(userDto.Id) ?? throw new NotFoundException();
+            var user = await _unitOfWork.UsersRepository.FindByIdAsync(userDto.Id);
+
+            if (user is null)
+            {
+                Log.Warning($"User with id = {userDto.Id} doesn't exist.");
+                throw new NotFoundException();
+            }
             
             _unitOfWork.UsersRepository.Update(user with {IsEnabled = false});
             await _unitOfWork.CommitAsync();
@@ -128,8 +160,10 @@ namespace HousingAssociation.Services
         {
             var user = await _unitOfWork.UsersRepository.FindByIdAsync(id);
             if (user is null)
+            {
+                Log.Warning($"User with id = {id} doesn't exist.");
                 throw new BadRequestException($"User with id {id} doesn't exist");
-            
+            }
             _unitOfWork.UsersRepository.Delete(user);
         }
         

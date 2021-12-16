@@ -31,7 +31,7 @@ namespace HousingAssociation.Controllers
         }
         
         // admin, worker, resident
-        [HttpGet("{userId:int}")]
+        [HttpGet("user/{userId:int}")]
         public async Task<IActionResult> GetDocumentByUserId(int userId)
         {
             return Ok(await _documentsService.FindAllByAuthorId(userId));

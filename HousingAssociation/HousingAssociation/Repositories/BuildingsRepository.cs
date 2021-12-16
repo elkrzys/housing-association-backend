@@ -20,6 +20,7 @@ namespace HousingAssociation.Repositories
                 .Include(b => b.Locals)
                 .ToListAsync();
 
+        public async Task<Building> FindByIdAsync(int id) => await _buildings.FindAsync(id);
         public async Task<Building> FindByIdWithAddressAsync(int id)
             => await _buildings
                 .Include(b => b.Address)
@@ -30,7 +31,10 @@ namespace HousingAssociation.Repositories
                 .Include(b => b.Locals)
                 .FirstOrDefaultAsync(b => b.Id == id);
         
-        //TODO: AddIfNotExists
+        public async Task<bool> CheckIfExistsAsync(Building building)
+            => await _buildings
+                .Include(b => b.Address)
+                .AnyAsync(b => b.Number == building.Number && b.Address.Equals(building.Address));
         public async Task<Building> AddAsync(Building building)
         {
             await _buildings.AddAsync(building);

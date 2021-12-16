@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using System.Transactions;
-using HousingAssociation.Controllers.Requests;
 using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.ExceptionHandling.Exceptions;
 using HousingAssociation.Models.DTOs;
 using HousingAssociation.Utils.Extensions;
+using Serilog;
 
 namespace HousingAssociation.Services
 {
@@ -24,7 +22,10 @@ namespace HousingAssociation.Services
         public async Task AddAnnouncementByBuildingsIds(AnnouncementDto announcementDto)
         {
             if (announcementDto is null)
+            {
+                Log.Warning("Bad request: AddAnnouncementByBuildingsIds - AnnouncementDto is null.");
                 throw new BadRequestException("Announcement incorrect");
+            }
 
             List<Building> buildings = new();
 
@@ -39,7 +40,10 @@ namespace HousingAssociation.Services
             }
 
             if (!buildings.Any())
+            {
+                Log.Warning("Bad request: no existing buildings matching the request.");
                 throw new BadRequestException("Announcement must have target buildings");
+            }
 
             await AddAnnouncementWithBuildings(announcementDto, buildings);
             
@@ -48,7 +52,10 @@ namespace HousingAssociation.Services
         public async Task AddAnnouncementByAddress(AnnouncementDto announcementDto)
         {
             if (!announcementDto.Addresses.Any())
+            {
+                Log.Warning("Bad request: Add by address but address list is empty.");
                 throw new BadRequestException("No target address defined");
+            }
 
             List<Building> buildings = new();
             foreach (var address in announcementDto.Addresses)
@@ -63,7 +70,10 @@ namespace HousingAssociation.Services
         public async Task UpdateAnnouncement(AnnouncementDto announcementDto)
         {
             if (announcementDto.Id is null)
+            {
+                Log.Warning("Bad request: announcement Id is null.");
                 throw new BadRequestException("Announcement incorrect");
+            }
 
             await CancelAnnouncementById(announcementDto.Id!.Value);
 
@@ -95,28 +105,46 @@ namespace HousingAssociation.Services
 
         public async Task DeleteAnnouncement(int id)
         {
-            var announcement = await _unitOfWork.AnnouncementsRepository.FindByIdAsync(id) ?? throw new NotFoundException();
+            var announcement = await _unitOfWork.AnnouncementsRepository.FindByIdAsync(id);
+            if (announcement is null)
+            {
+                Log.Warning($"Announcement with id = {id} doesn't exist.");
+                throw new NotFoundException();
+            }
             _unitOfWork.AnnouncementsRepository.Delete(announcement);
             await _unitOfWork.CommitAsync();
         }
 
         public async Task<List<Announcement>> GetAll() => await _unitOfWork.AnnouncementsRepository.FindAllAsync();
 
-        public async Task<List<Announcement>> GetAllByBuildingId(int buildingId) =>
-            await _unitOfWork.AnnouncementsRepository.FindAllByTargetBuildingIdAsync(buildingId);
+        public async Task<List<Announcement>> GetAllByBuildingId(int buildingId)
+        {
+            if (await _unitOfWork.BuildingsRepository.FindByIdAsync(buildingId) is null)
+            {
+                Log.Warning($"Building with id = {buildingId} doesn't exist.");
+                throw new NotFoundException();
+            }
+            return await _unitOfWork.AnnouncementsRepository.FindAllByTargetBuildingIdAsync(buildingId);
+        }
         
         public async Task<List<Announcement>> GetAllByAddress(Address address)
         {
-            if (address is null) 
+            if (address is null)
+            {
+                Log.Warning("Attempt to find announcement with address = null.");
                 throw new BadRequestException("Address must not be null");
+            }
 
             return await _unitOfWork.AnnouncementsRepository.FindAllByAddressAsync(address);
         }
 
         public async Task<List<AnnouncementDto>> GetAllByReceiverId(int receiverId)
         {
-            var receiver = await _unitOfWork.UsersRepository.FindByIdAndIncludeAllLocalsAsync(receiverId) 
-                           ?? throw new NotFoundException();
+            var receiver = await _unitOfWork.UsersRepository.FindByIdAndIncludeAllLocalsAsync(receiverId); 
+            if(receiver is null){               
+                Log.Warning($"User with id = {receiverId} doesn't exists.");
+                throw new NotFoundException();
+            }
 
             var receiverLocals = receiver.ResidedLocals
                 .Concat(receiver.OwnedLocals)
@@ -140,17 +168,25 @@ namespace HousingAssociation.Services
 
         public async Task<List<AnnouncementDto>> GetAllByAuthorId(int authorId)
         {
+            if (await _unitOfWork.UsersRepository.FindByIdAsync(authorId) is null)
+            {
+                Log.Warning($"User with id = {authorId} doesn't exist.");
+                throw new NotFoundException();
+            }
             var announcements =  await _unitOfWork.AnnouncementsRepository.FindAllByAuthorIdAsync(authorId);
             return (announcements is not null) ? GetAnnouncementsAsDtos(announcements) : null;
         }
 
         public async Task CancelAnnouncementById(int id)
         {
-            var announcement = await _unitOfWork.AnnouncementsRepository.FindByIdAsync(id) 
-                               ?? throw new NotFoundException();
+            var announcement = await _unitOfWork.AnnouncementsRepository.FindByIdAsync(id);
+            if (announcement is null)
+            {
+                Log.Warning($"Announcement with id = {id} doesn't exists.");
+                throw new NotFoundException();
+            }
 
             announcement.Cancelled = DateTimeOffset.Now;
-            
             _unitOfWork.AnnouncementsRepository.Update(announcement);
             await _unitOfWork.CommitAsync();
         }
@@ -178,19 +214,17 @@ namespace HousingAssociation.Services
             };
             
             if (await _unitOfWork.AnnouncementsRepository.CheckIfExistsAsync(announcement))
+            {
+                Log.Warning("Announcement already exists.");
                 throw new BadRequestException("Such announcement already exists.");
+            }
             
             await _unitOfWork.AnnouncementsRepository.AddAsync(announcement);
             await _unitOfWork.CommitAsync();
         }
         
-        
-
         private List<AnnouncementDto> GetAnnouncementsAsDtos(List<Announcement> announcements)
-        {
-            List<AnnouncementDto> announcementDtos = new();
-            announcements.ForEach(a => announcementDtos.Add(a.AsDto()));
-            return announcementDtos;
-        }
+            => announcements.Select(a => a.AsDto()).ToList();
+  
     }
 }
