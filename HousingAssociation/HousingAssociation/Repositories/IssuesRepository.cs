@@ -16,8 +16,8 @@ namespace HousingAssociation.Repositories
             _issues = dbContext.Issues;
         }
         public async Task<bool> CheckIfExistsAsync(IssueDto issueDto)
-            => await _issues
-                .Include(i => i.Local)
+            => await _issues.AsNoTracking()
+                .Include(i => i.Local).AsNoTracking()
                 .AnyAsync(i =>
                 i.Title.Equals(issueDto.Title) &&
                 i.Content.Equals(issueDto.Content) &&
@@ -26,7 +26,8 @@ namespace HousingAssociation.Repositories
         public async Task AddAsync(Issue issue) => await _issues.AddAsync(issue);
         public void Update(Issue issue) => _issues.Update(issue);
         public void Delete(Issue issue) => _issues.Remove(issue);
-        public async Task<Issue> FindByIdAsync(int id)
+        public async Task<Issue> FindByIdAsync(int id) => await _issues.FindAsync(id);
+        public async Task<Issue> FindByIdAsyncWithDetails(int id)
             => await _issues
                 .Include(issue => issue.Local)
                     .ThenInclude(l => l.Building)
@@ -35,6 +36,7 @@ namespace HousingAssociation.Repositories
         public async Task<List<Issue>> FindAllAsync() => await _issues.ToListAsync();
         public async Task<List<Issue>> FindAllNotCancelledAsync() 
             => await _issues
+                .Include(issue => issue.Author)
                 .Include(issue => issue.Local)
                     .ThenInclude(l => l.Building)
                         .ThenInclude(b => b.Address)
@@ -42,6 +44,7 @@ namespace HousingAssociation.Repositories
                 .ToListAsync();
         public async Task<List<Issue>> FindAllBySourceBuildingIdAsync(int buildingId) =>
             await _issues
+                .Include(issue => issue.Author)
                 .Include(issue => issue.Local)
                     .ThenInclude(issue => issue.Building)
                         .ThenInclude(b => b.Address)

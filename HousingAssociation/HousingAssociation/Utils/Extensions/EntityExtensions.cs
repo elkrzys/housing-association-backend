@@ -54,14 +54,21 @@ namespace HousingAssociation.Utils.Extensions
             => new IssueDto
             {
                 Id = issue.Id,
-                AuthorId = issue.AuthorId,
+                //AuthorId = issue.AuthorId,
                 Title = issue.Title,
                 Content = issue.Content,
-                Cancelled = issue.Cancelled,
-                Resolved = issue.Resolved,
-                SourceBuildingId = issue.Local.BuildingId,
+                Created = issue.Created.ToString("yyyy-MM-ddTHH:mm:ss"),
+                Cancelled = issue.Cancelled?.ToString("yyyy-MM-ddTHH:mm:ss"),
+                Resolved = issue.Resolved?.ToString("yyyy-MM-ddTHH:mm:ss"),
+                SourceBuildingId = issue.Local?.BuildingId,
                 SourceLocalId = issue.SourceLocalId ?? 0,
-                Address = issue.Local?.Building?.Address
+                Address = issue.Local?.Building?.Address,
+                Author = new Author
+                {
+                    Id = issue.AuthorId, 
+                    FirstName = issue.Author?.FirstName, 
+                    LastName = issue.Author?.LastName
+                }
             };
 
         public static LocalDto AsDto(this Local local)
@@ -69,10 +76,12 @@ namespace HousingAssociation.Utils.Extensions
             {
                 Id = local.Id,
                 BuildingId = local.BuildingId,
+                BuildingNumber = local.Building?.Number,
                 Area = local.Area,
                 Number = local.Number,
                 IsFullyOwned = local.IsFullyOwned,
-                NumberOfResidents = local.Residents?.Count
+                NumberOfResidents = local.Residents?.Count,
+                Address = local.Building?.Address
             };
     }
 }

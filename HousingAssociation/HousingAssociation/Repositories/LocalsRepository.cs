@@ -36,6 +36,8 @@ namespace HousingAssociation.Repositories
 
         public async Task<List<Local>> FindAllByResidentId(int id)
             => await _locals
+                .Include(local => local.Building)
+                .ThenInclude(building => building.Address)
                 .Include(local => local.Residents)
                 .Where(local => local.Residents.Any(r => r.Id == id))
                 .ToListAsync();

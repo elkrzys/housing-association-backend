@@ -26,20 +26,60 @@ namespace HousingAssociation.Services
                 Log.Warning($"Issue already exists.");
                 throw new BadRequestException("Issue already exists");
             }
+            if (issueDto.Author is null)
+            {
+                Log.Warning($"Issue author is null");
+                throw new BadRequestException("Issue author is null");
+            }
+            
             var issue = new Issue
             {
                 Title = issueDto.Title,
                 Content = issueDto.Content,
                 SourceLocalId = issueDto.SourceLocalId,
-                AuthorId = issueDto.AuthorId
+                AuthorId = issueDto.Author.Id
             };
             await _unitOfWork.IssuesRepository.AddAsync(issue with {Created = DateTime.Now});
             await _unitOfWork.CommitAsync();
         }
+        
+        public async Task UpdateIssue(IssueDto issueDto)
+        {
+            if (issueDto.Id is null)
+            {
+                Log.Warning("Bad request: issue Id is null.");
+                throw new BadRequestException("Issue incorrect");
+            }
+            if (issueDto.Author is null)
+            {
+                Log.Warning("Bad request: author is null.");
+                throw new BadRequestException("Issue author incorrect");
+            }
+            
+            var issue = new Issue
+            {
+                Title = issueDto.Title,
+                Content = issueDto.Content,
+                SourceLocalId = issueDto.SourceLocalId,
+                AuthorId = issueDto.Author.Id,
+                PreviousIssueId = issueDto.Id
+            };
+            
+            await _unitOfWork.OuterTransaction(async () =>
+            {
+                await CancelIssue(issueDto.Id!.Value);
+                await _unitOfWork.IssuesRepository.AddAsync(issue with {Created = DateTime.Now});
+            });
+            // await CancelIssue(issueDto.Id!.Value);
+            //
+            //
+            //
+            // await _unitOfWork.CommitAsync();
+        }
 
         public async Task<IssueDto> GetById(int id)
         {
-            var issue = await _unitOfWork.IssuesRepository.FindByIdAsync(id) ?? throw new NotFoundException();
+            var issue = await _unitOfWork.IssuesRepository.FindByIdAsyncWithDetails(id) ?? throw new NotFoundException();
             return issue.AsDto();
         }
         
@@ -58,7 +98,6 @@ namespace HousingAssociation.Services
         public async Task CancelIssue(int id)
         {
             var issue = await _unitOfWork.IssuesRepository.FindByIdAsync(id);
-            
             if(issue is null)
             {
                 Log.Information($"Issue with id = {id} doesn't exist.");
@@ -70,7 +109,7 @@ namespace HousingAssociation.Services
         
         public async Task ResolveIssue(int id)
         {
-            var issue = await _unitOfWork.IssuesRepository.FindByIdAsync(id);
+            var issue = await _unitOfWork.IssuesRepository.FindByIdAsyncWithDetails(id);
             if (issue is null)
             {
                 Log.Warning($"Issue with id = {id} doesn't exist.");

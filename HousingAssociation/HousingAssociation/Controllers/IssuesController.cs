@@ -32,6 +32,14 @@ namespace HousingAssociation.Controllers
             return Ok();
         }
         
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateIssue(int id, IssueDto issueDto)
+        {
+            issueDto.Id = id;
+            await _issuesService.UpdateIssue(issueDto);
+            return Ok();
+        }
+
         [HttpPut("resolve/{id:int}")]
         public async Task<IActionResult> ResolveIssue(int id)
         {

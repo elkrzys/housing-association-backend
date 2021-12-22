@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using HousingAssociation.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace HousingAssociation.DataAccess
 {
@@ -18,5 +20,6 @@ namespace HousingAssociation.DataAccess
         Task CommitAsync();
         void SetModified<T>(T entity);
         void SetModified<T>(List<T> entities);
+        Task OuterTransaction(Func<Task> methodToInvoke);
     }
 }
