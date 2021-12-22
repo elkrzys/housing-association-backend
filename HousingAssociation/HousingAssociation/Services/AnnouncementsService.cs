@@ -28,7 +28,6 @@ namespace HousingAssociation.Services
             }
 
             List<Building> buildings = new();
-
             foreach (var buildingId in announcementDto.TargetBuildingsIds)
             {
                 var building = await _unitOfWork.BuildingsRepository.FindByIdWithAddressAsync(buildingId);
@@ -38,15 +37,12 @@ namespace HousingAssociation.Services
                     buildings.Add(building);
                 }
             }
-
             if (!buildings.Any())
             {
                 Log.Warning("Bad request: no existing buildings matching the request.");
                 throw new BadRequestException("Announcement must have target buildings");
             }
-
             await AddAnnouncementWithBuildings(announcementDto, buildings);
-            
         }
         
         public async Task AddAnnouncementByAddress(AnnouncementDto announcementDto)
@@ -75,32 +71,34 @@ namespace HousingAssociation.Services
                 throw new BadRequestException("Announcement incorrect");
             }
 
-            await CancelAnnouncementById(announcementDto.Id!.Value);
-
-            if (announcementDto.TargetBuildingsIds.Any())
+            await _unitOfWork.OuterTransaction(async () =>
             {
-                // foreach (var buildingId in announcementDto.TargetBuildingsIds)
-                // {
-                //     var building = await _unitOfWork.BuildingsRepository.FindByIdAsync(buildingId);
-                //     if(building is not null)
-                //         buildings.Add(building);
-                // }
-                await AddAnnouncementByBuildingsIds(announcementDto);
-            }
-            else if (announcementDto.Addresses.Any())
-            {
-                // foreach (var address in announcementDto.Addresses)
-                // {
-                //     var buildingsFromAddress = await _unitOfWork.BuildingsRepository.FindByAddressAsync(address);
-                //     buildings = buildings.Concat(buildingsFromAddress).Distinct().ToList();
-                // }
-                await AddAnnouncementByAddress(announcementDto);
-            }
-            else
-            {
-                var buildings = await _unitOfWork.BuildingsRepository.FindAllAsync();
-                await AddAnnouncementWithBuildings(announcementDto, buildings);
-            }
+                await CancelAnnouncementById(announcementDto.Id!.Value);
+                if (announcementDto.TargetBuildingsIds.Any())
+                {
+                    // foreach (var buildingId in announcementDto.TargetBuildingsIds)
+                    // {
+                    //     var building = await _unitOfWork.BuildingsRepository.FindByIdAsync(buildingId);
+                    //     if(building is not null)
+                    //         buildings.Add(building);
+                    // }
+                    await AddAnnouncementByBuildingsIds(announcementDto);
+                }
+                else if (announcementDto.Addresses.Any())
+                {
+                    // foreach (var address in announcementDto.Addresses)
+                    // {
+                    //     var buildingsFromAddress = await _unitOfWork.BuildingsRepository.FindByAddressAsync(address);
+                    //     buildings = buildings.Concat(buildingsFromAddress).Distinct().ToList();
+                    // }
+                    await AddAnnouncementByAddress(announcementDto);
+                }
+                else
+                {
+                    var buildings = await _unitOfWork.BuildingsRepository.FindAllAsync();
+                    await AddAnnouncementWithBuildings(announcementDto, buildings);
+                }
+            });
         }
 
         public async Task DeleteAnnouncement(int id)
@@ -124,7 +122,7 @@ namespace HousingAssociation.Services
                 Log.Warning($"Building with id = {buildingId} doesn't exist.");
                 throw new NotFoundException();
             }
-            return await _unitOfWork.AnnouncementsRepository.FindAllByTargetBuildingIdAsync(buildingId);
+            return await _unitOfWork.AnnouncementsRepository.FindNotCancelledByTargetBuildingIdAsync(buildingId);
         }
         
         public async Task<List<Announcement>> GetAllByAddress(Address address)
@@ -159,7 +157,7 @@ namespace HousingAssociation.Services
                 if (b is not null)
                 {
                     var buildingAnnouncements =
-                        await _unitOfWork.AnnouncementsRepository.FindAllByTargetBuildingIdAsync(local.BuildingId);
+                        await _unitOfWork.AnnouncementsRepository.FindNotCancelledByTargetBuildingIdAsync(local.BuildingId);
                     announcements = announcements.Concat(buildingAnnouncements).Distinct().ToList();
                 }
             }

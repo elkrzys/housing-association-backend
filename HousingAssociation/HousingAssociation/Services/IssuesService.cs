@@ -109,7 +109,7 @@ namespace HousingAssociation.Services
         
         public async Task ResolveIssue(int id)
         {
-            var issue = await _unitOfWork.IssuesRepository.FindByIdAsyncWithDetails(id);
+            var issue = await _unitOfWork.IssuesRepository.FindByIdAsync(id);
             if (issue is null)
             {
                 Log.Warning($"Issue with id = {id} doesn't exist.");

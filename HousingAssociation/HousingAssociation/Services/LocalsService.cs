@@ -59,6 +59,12 @@ namespace HousingAssociation.Services
             var local = await _unitOfWork.LocalsRepository.FindByIdAsync(localId) ?? throw new NotFoundException();
             var resident = await _unitOfWork.UsersRepository.FindByIdAsync(residentId) ?? throw new NotFoundException();
             
+            if (local.Residents.Exists(r => r.Id == residentId))
+            {
+                Log.Warning($"Resident with id = {residentId} is already assigned to local with id = {local.Id}");
+                throw new BadRequestException("User is already assigned to the local");
+            }
+            
             local.Residents.Add(resident);
             _unitOfWork.LocalsRepository.Update(local);
             await _unitOfWork.CommitAsync();

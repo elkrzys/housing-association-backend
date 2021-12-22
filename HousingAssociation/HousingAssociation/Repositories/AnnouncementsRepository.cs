@@ -42,10 +42,11 @@ namespace HousingAssociation.Repositories
                 .Where(a => a.AuthorId == authorId)
                 .ToListAsync();
         public async Task<List<Announcement>> FindAllAsync() => await _announcements.ToListAsync();
-        public async Task<List<Announcement>> FindAllByTargetBuildingIdAsync(int buildingId)
+        public async Task<List<Announcement>> FindNotCancelledByTargetBuildingIdAsync(int buildingId)
             => await _announcements
                 .Include(a => a.TargetBuildings)
                 .Where(a => a.TargetBuildings.Any(b => b.Id == buildingId))
+                .Where(a => a.Cancelled == null)
                 .ToListAsync();
         public async Task<List<Announcement>> FindAllByAddressAsync(Address address) 
             => await _announcements

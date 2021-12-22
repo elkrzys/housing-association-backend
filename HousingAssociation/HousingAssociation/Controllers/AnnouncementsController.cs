@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using HousingAssociation.Controllers.Requests;
 using HousingAssociation.Models.DTOs;
 using HousingAssociation.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -62,7 +61,7 @@ namespace HousingAssociation.Controllers
         }
         
         // worker, admin
-        [HttpDelete("{id:int}")]
+        [HttpPut("cancel/{id:int}")]
         public async Task<IActionResult> Cancel(int id)
         {
             await _announcementsService.CancelAnnouncementById(id);

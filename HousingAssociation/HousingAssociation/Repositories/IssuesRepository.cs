@@ -55,7 +55,7 @@ namespace HousingAssociation.Repositories
                 .Include(issue => issue.Local)
                     .ThenInclude(issue => issue.Building)
                         .ThenInclude(b => b.Address)
-                .Where(issue => issue.AuthorId == authorId)
+                .Where(issue => issue.AuthorId == authorId && issue.Cancelled == null)
                 .ToListAsync();
     }
 }
