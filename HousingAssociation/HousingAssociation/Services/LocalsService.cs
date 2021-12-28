@@ -44,7 +44,7 @@ namespace HousingAssociation.Services
 
         public async Task<List<LocalDto>> FindAllFromBuilding(int buildingId)
         {
-            if(await _unitOfWork.BuildingsRepository.FindByIdWithAddressAsync(buildingId) is null)
+            if(await _unitOfWork.BuildingsRepository.FindByIdWithDetailsAsync(buildingId) is null)
             {
                 Log.Warning($"Building with id = {buildingId} doesn't exist.");
                 throw new BadRequestException("Building doesn't exists.");
@@ -86,7 +86,6 @@ namespace HousingAssociation.Services
 
             local.Area = localDto.Area;
             local.Number = localDto.Number;
-            local.BuildingId = localDto.BuildingId;
             local.IsFullyOwned = localDto.IsFullyOwned ?? local.IsFullyOwned;
             
             _unitOfWork.LocalsRepository.Update(local);

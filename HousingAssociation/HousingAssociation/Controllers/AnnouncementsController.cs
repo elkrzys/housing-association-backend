@@ -19,6 +19,10 @@ namespace HousingAssociation.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllAnnouncements() => Ok(await _announcementsService.GetAll());
         
+        // worker, admin
+        [HttpGet("not-cancelled")]
+        public async Task<IActionResult> GetAllNotCancelledAnnouncements() => Ok(await _announcementsService.GetAll());
+        
         // resident
         [HttpGet("receiver/{receiverId:int}")]
         public async Task<IActionResult> GetAllAnnouncementsByReceiverId(int receiverId)

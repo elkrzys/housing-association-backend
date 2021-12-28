@@ -1,4 +1,6 @@
-﻿using HousingAssociation.DataAccess.Entities;
+﻿using System.Collections.Generic;
+using System.Linq;
+using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.Models.DTOs;
 using Microsoft.AspNetCore.Identity;
 
@@ -33,11 +35,17 @@ namespace HousingAssociation.Utils.Extensions
             => new AnnouncementDto
             {
                 Id = announcement.Id,
-                AuthorId = announcement.AuthorId,
+                Author = new Author
+                {
+                    Id = announcement.AuthorId,
+                    FirstName = announcement.Author.FirstName,
+                    LastName = announcement.Author.LastName
+                },
                 Content = announcement.Content,
                 ExpirationDate = announcement.ExpirationDate,
                 Title = announcement.Title,
-                Type = announcement.Type
+                Type = announcement.Type,
+                Created = announcement.Created
             };
         
         public static BuildingDto AsDto(this Building building)
@@ -47,6 +55,7 @@ namespace HousingAssociation.Utils.Extensions
                 Address = building.Address,
                 Type = building.Type,
                 Number = building.Number,
+                Locals = building.Locals?.Select(local => local.AsDto()),
                 NumberOfLocals = building.Locals?.Count
             };
         

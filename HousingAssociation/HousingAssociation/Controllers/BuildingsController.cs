@@ -17,13 +17,16 @@ namespace HousingAssociation.Controllers
             _buildingsService = buildingsService;
         }
         
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id) => Ok(await _buildingsService.GetById(id));
+
         //TODO: make this controller available only for worker and admin
         [HttpGet]
         public async Task<IActionResult> GetAllBuildings() => Ok(await _buildingsService.GetAll());
         
         // TODO: check if params from querystring will be mapped to object (Postman)
-        [HttpGet("address")]
-        public async Task<IActionResult> GetAllBuildingsByAddress(string city = null, string district = null, string street = null)
+        [HttpGet("address/{city}/{street}/{district?}")]
+        public async Task<IActionResult> GetAllBuildingsByAddress(string city = "", string street = "", string district = "")
             => Ok(await _buildingsService.GetAllBuildingsByAddress(new Address {City = city, District = district, Street = street}));
         
         [HttpPost]

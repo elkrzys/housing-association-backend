@@ -101,6 +101,7 @@ namespace HousingAssociation
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             
             // Services
+            services.AddScoped<AddressesService>();
             services.AddScoped<BuildingsService>();
             services.AddScoped<LocalsService>();
             services.AddScoped<UsersService>();

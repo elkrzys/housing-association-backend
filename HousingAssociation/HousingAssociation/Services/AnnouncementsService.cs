@@ -30,7 +30,7 @@ namespace HousingAssociation.Services
             List<Building> buildings = new();
             foreach (var buildingId in announcementDto.TargetBuildingsIds)
             {
-                var building = await _unitOfWork.BuildingsRepository.FindByIdWithAddressAsync(buildingId);
+                var building = await _unitOfWork.BuildingsRepository.FindByIdWithDetailsAsync(buildingId);
                 if (building is not null)
                 {
                     _unitOfWork.SetModified(building);
@@ -113,27 +113,32 @@ namespace HousingAssociation.Services
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task<List<Announcement>> GetAll() => await _unitOfWork.AnnouncementsRepository.FindAllAsync();
+        public async Task<List<AnnouncementDto>> GetAll()
+        {
+            var announcements = await _unitOfWork.AnnouncementsRepository.FindAllNotCancelledAsync();
+            return GetAnnouncementsAsDtos(announcements);
+        }
 
-        public async Task<List<Announcement>> GetAllByBuildingId(int buildingId)
+        public async Task<List<AnnouncementDto>> GetAllByBuildingId(int buildingId)
         {
             if (await _unitOfWork.BuildingsRepository.FindByIdAsync(buildingId) is null)
             {
                 Log.Warning($"Building with id = {buildingId} doesn't exist.");
                 throw new NotFoundException();
             }
-            return await _unitOfWork.AnnouncementsRepository.FindNotCancelledByTargetBuildingIdAsync(buildingId);
+            var announcements = await _unitOfWork.AnnouncementsRepository.FindNotCancelledByTargetBuildingIdAsync(buildingId);
+            return GetAnnouncementsAsDtos(announcements);
         }
         
-        public async Task<List<Announcement>> GetAllByAddress(Address address)
+        public async Task<List<AnnouncementDto>> GetAllByAddress(Address address)
         {
             if (address is null)
             {
                 Log.Warning("Attempt to find announcement with address = null.");
                 throw new BadRequestException("Address must not be null");
             }
-
-            return await _unitOfWork.AnnouncementsRepository.FindAllByAddressAsync(address);
+            var announcements = await _unitOfWork.AnnouncementsRepository.FindAllByAddressAsync(address);
+            return GetAnnouncementsAsDtos(announcements);
         }
 
         public async Task<List<AnnouncementDto>> GetAllByReceiverId(int receiverId)
@@ -150,10 +155,9 @@ namespace HousingAssociation.Services
                 .ToList();
             
             List<Announcement> announcements = new();
-
             foreach (var local in receiverLocals)
             {
-                var b = await _unitOfWork.BuildingsRepository.FindByIdWithAddressAsync(local.BuildingId);
+                var b = await _unitOfWork.BuildingsRepository.FindByIdWithDetailsAsync(local.BuildingId);
                 if (b is not null)
                 {
                     var buildingAnnouncements =
@@ -203,7 +207,7 @@ namespace HousingAssociation.Services
             var announcement = new Announcement
             {
                 TargetBuildings = buildings,
-                AuthorId = announcementDto.AuthorId,
+                AuthorId = announcementDto.Author.Id,
                 Created = DateTimeOffset.Now,
                 Content = announcementDto.Content,
                 Title = announcementDto.Title,

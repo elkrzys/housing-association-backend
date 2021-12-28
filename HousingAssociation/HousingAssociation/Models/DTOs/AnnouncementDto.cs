@@ -12,7 +12,8 @@ namespace HousingAssociation.Models.DTOs
         [Required] public AnnouncementType Type { get; set; }
         [MaxLength(255)] public string Title { get; set; }
         [MaxLength(255)] public string Content { get; set; }
-        [Required] public int AuthorId { get; set; }
+        public DateTimeOffset Created { get; set; }
+        public Author Author { get; set; }
         public List<int> TargetBuildingsIds { get; set; }
         public List<Address> Addresses { get; set; }
         public DateTimeOffset? ExpirationDate { get; set; }

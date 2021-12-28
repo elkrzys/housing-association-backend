@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HousingAssociation.DataAccess;
@@ -40,7 +41,30 @@ namespace HousingAssociation.Repositories
         public async Task<Address> FindAddressAsync(Address address) => await _addresses.FirstOrDefaultAsync(a => a.City.Equals(address.City) 
                                                                             && a.District.Equals(address.District) 
                                                                             && a.Street.Equals(address.Street));
-        
+
+        public async Task<List<string>> FindAllCitiesAsync() 
+            => await _addresses
+                .Select(a => a.City)
+                .Distinct()
+                .ToListAsync();
+
+        public async Task<List<string>> FindAllDistrictsByCityAsync(string city)
+            => await _addresses
+                .Where(a => a.City.Equals(city))
+                .Where(a => !string.IsNullOrEmpty(a.District))
+                .Select(a => a.District)
+                .Distinct()
+                .ToListAsync();
+
+        public async Task<List<string>> FindAllStreetsByCityAndDistrictAsync(string city,
+            string district)
+            => await _addresses
+                .Where(a => a.City.Equals(city))
+                .Where(a => string.IsNullOrEmpty(district) || string.IsNullOrWhiteSpace(district) || a.District.Equals(district))
+                .Select(a => a.Street)
+                .Distinct()
+                .ToListAsync();
+
         public void Delete(Address address)
         {
             _addresses.Remove(address);

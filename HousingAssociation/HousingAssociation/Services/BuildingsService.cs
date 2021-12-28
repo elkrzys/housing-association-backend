@@ -24,6 +24,17 @@ namespace HousingAssociation.Services
             var buildings = await _unitOfWork.BuildingsRepository.FindAllAsync();
             return GetBuildingsAsDtos(buildings);
         }
+        
+        public async Task<BuildingDto> GetById(int id)
+        {
+            var building = await _unitOfWork.BuildingsRepository.FindByIdWithDetailsAsync(id);
+            if (building is null)
+            {
+                Log.Warning($"Building with id = {id} doesn't exist.");
+                throw new BadRequestException($"Building doesn't exist.");
+            }
+            return building.AsDto();
+        }
 
         public async Task AddBuildingWithAddress(BuildingDto buildingDto)
         {
@@ -67,7 +78,7 @@ namespace HousingAssociation.Services
                 throw new BadRequestException("Building Id can't be null");
             }
 
-            var building = await _unitOfWork.BuildingsRepository.FindByIdWithLocalsAsync(buildingDto.Id!.Value);
+            var building = await _unitOfWork.BuildingsRepository.FindByIdWithDetailsAsync(buildingDto.Id!.Value);
             var newAddress = await _unitOfWork.AddressesRepository.AddNewAddressOrReturnExisting(buildingDto.Address);
             
             if (newAddress.Id != 0)
@@ -89,7 +100,7 @@ namespace HousingAssociation.Services
 
         public async Task DeleteById(int id)
         {
-            var building = await _unitOfWork.BuildingsRepository.FindByIdWithAddressAsync(id);
+            var building = await _unitOfWork.BuildingsRepository.FindByIdWithDetailsAsync(id);
             if(building is null)
             {
                 Log.Warning($"Building with id = {id} doesn't exist.");
