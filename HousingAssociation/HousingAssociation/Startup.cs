@@ -95,7 +95,7 @@ namespace HousingAssociation
                 options.UseNpgsql(dbSettings.ConnectionString)
                     .UseSnakeCaseNamingConvention()
                     .UseEnumCheckConstraints()
-                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+                    //.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
             );
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();

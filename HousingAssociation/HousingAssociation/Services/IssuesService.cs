@@ -70,11 +70,6 @@ namespace HousingAssociation.Services
                 await CancelIssue(issueDto.Id!.Value);
                 await _unitOfWork.IssuesRepository.AddAsync(issue with {Created = DateTime.Now});
             });
-            // await CancelIssue(issueDto.Id!.Value);
-            //
-            //
-            //
-            // await _unitOfWork.CommitAsync();
         }
 
         public async Task<IssueDto> GetById(int id)
@@ -103,7 +98,7 @@ namespace HousingAssociation.Services
                 Log.Information($"Issue with id = {id} doesn't exist.");
                 throw new NotFoundException();
             }
-            _unitOfWork.IssuesRepository.Update(issue with {Cancelled = DateTimeOffset.Now});
+            issue.Cancelled = DateTimeOffset.Now;
             await _unitOfWork.CommitAsync();
         }
         
@@ -115,7 +110,8 @@ namespace HousingAssociation.Services
                 Log.Warning($"Issue with id = {id} doesn't exist.");
                 throw new NotFoundException();
             }
-            _unitOfWork.IssuesRepository.Update(issue with {Resolved = DateTimeOffset.Now});
+
+            issue.Resolved = DateTimeOffset.Now;
             await _unitOfWork.CommitAsync();
         }
         

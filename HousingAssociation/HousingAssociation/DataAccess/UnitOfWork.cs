@@ -29,6 +29,10 @@ namespace HousingAssociation.DataAccess
         {
             Context.Entry(entity).State = EntityState.Modified;
         }
+        public void SetUnchanged<T>(T entity)
+        {
+            Context.Entry(entity).State = EntityState.Unchanged;
+        }
         public void SetModified<T>(List<T> entities)
         {
             entities.ForEach(entity => Context.Entry(entity).State = EntityState.Modified);

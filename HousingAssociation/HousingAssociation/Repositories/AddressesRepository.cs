@@ -10,21 +10,20 @@ namespace HousingAssociation.Repositories
 {
     public class AddressesRepository
     {
-        private readonly AppDbContext _dbContext;
         private readonly DbSet<Address> _addresses;
         
         public AddressesRepository(AppDbContext dbContext)
         {
-            _dbContext = dbContext;
-            _addresses = _dbContext.Addresses;
+            _addresses = dbContext.Addresses;
         }
         
         public async Task<Address> AddNewAddressOrReturnExisting(Address address)
         {
 
-            var existingAddress = await _addresses.FirstOrDefaultAsync(a => a.City.Equals(address.City) 
-                                                                && a.District.Equals(address.District) 
-                                                                && a.Street.Equals(address.Street));
+            var existingAddress = await _addresses
+                .FirstOrDefaultAsync(a => a.City.Equals(address.City) 
+                                          && (string.IsNullOrEmpty(address.District) || a.District.Equals(address.District))
+                                          && a.Street.Equals(address.Street));
             
             if (existingAddress is null)
             {

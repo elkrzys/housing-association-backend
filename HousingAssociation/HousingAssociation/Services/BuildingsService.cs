@@ -90,11 +90,9 @@ namespace HousingAssociation.Services
             {
                 building.Address = newAddress;
             }
-            
-            _unitOfWork.BuildingsRepository.Update(building with
-            {
-                Number = buildingDto.Number, Type = buildingDto.Type
-            });
+
+            building.Number = buildingDto.Number;
+            building.Type = buildingDto.Type;
             await _unitOfWork.CommitAsync();
         }
 

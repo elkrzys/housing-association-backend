@@ -26,6 +26,10 @@ namespace HousingAssociation.Controllers
         [HttpGet("get-by-resident/{residentId:int}")]
         public async Task<IActionResult> GetAllByResidentId(int residentId)
             => Ok(await _localsService.GetAllByResidentId(residentId));
+        
+        [HttpPost("get-by-details")]
+        public async Task<IActionResult> GetLocalIdByDetails(LocalDto localDto)
+            => Ok(await _localsService.GetLocalIdByLocalDetails(localDto));
 
         [HttpPost]
         public async Task<IActionResult> AddLocal(LocalDto local)
@@ -49,7 +53,7 @@ namespace HousingAssociation.Controllers
             return Ok();
         }
 
-        [HttpPost("/add-resident/{localId:int}/{residentId:int}")]
+        [HttpPost("add-resident/{localId:int}/{residentId:int}")]
         public async Task<IActionResult> AddLocalResident(int localId, int residentId)
         {
             await _localsService.AddResidentToLocal(localId, residentId);
@@ -57,7 +61,7 @@ namespace HousingAssociation.Controllers
         }
         
         //TODO: optionally set all related issues as cancelled
-        [HttpDelete("/remove-resident/{localId:int}/{residentId:int}")]
+        [HttpDelete("remove-resident/{localId:int}/{residentId:int}")]
         public async Task<IActionResult> RemoveLocalResident(int localId, int residentId)
         {
             await _localsService.RemoveResidentFromLocal(localId, residentId);

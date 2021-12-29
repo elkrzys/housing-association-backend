@@ -15,7 +15,7 @@ namespace HousingAssociation.Models.DTOs
         public DateTimeOffset Created { get; set; }
         public Author Author { get; set; }
         public List<int> TargetBuildingsIds { get; set; }
-        public List<Address> Addresses { get; set; }
+        public List<AddressDto> Addresses { get; set; }
         public DateTimeOffset? ExpirationDate { get; set; }
     }
 }

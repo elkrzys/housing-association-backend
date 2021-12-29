@@ -24,7 +24,6 @@ namespace HousingAssociation.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllBuildings() => Ok(await _buildingsService.GetAll());
         
-        // TODO: check if params from querystring will be mapped to object (Postman)
         [HttpGet("address/{city}/{street}/{district?}")]
         public async Task<IActionResult> GetAllBuildingsByAddress(string city = "", string street = "", string district = "")
             => Ok(await _buildingsService.GetAllBuildingsByAddress(new Address {City = city, District = district, Street = street}));

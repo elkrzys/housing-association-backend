@@ -55,7 +55,7 @@ namespace HousingAssociation.Services
                 throw new NotFoundException();
             }
             
-            _unitOfWork.UsersRepository.Update(user with {IsEnabled = true});
+            user.IsEnabled = true;
             await _unitOfWork.CommitAsync();
             
             return user.AsDto();
@@ -110,16 +110,14 @@ namespace HousingAssociation.Services
                 Log.Warning($"User with id = {userDto.Id} doesn't exist.");
                 throw new NotFoundException();
             }
-            
-            _unitOfWork.UsersRepository.Update(user with
-            {
-                FirstName = userDto.FirstName,
-                LastName = userDto.LastName,
-                Email = userDto.Email,
-                PhoneNumber = userDto.PhoneNumber,
-                Role = userDto.Role ?? user.Role,
-                IsEnabled = userDto.IsEnabled ?? user.IsEnabled
-            });
+
+            user.FirstName = userDto.FirstName;
+            user.LastName = userDto.LastName;
+            user.Email = userDto.Email;
+            user.PhoneNumber = userDto.PhoneNumber;
+            user.Role = userDto.Role ?? user.Role;
+            user.IsEnabled = userDto.IsEnabled ?? user.IsEnabled;
+        
             await _unitOfWork.CommitAsync();
         }
 
@@ -136,11 +134,8 @@ namespace HousingAssociation.Services
                 Log.Warning($"User with id = {userId} didn't match old password.");
                 throw new BadRequestException("Old password not valid");
             }
-            
-            _unitOfWork.UserCredentialsRepository.Update(credentials with
-            {
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword)
-            });
+
+            credentials.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
             await _unitOfWork.CommitAsync();
         }
         public async Task DisableUser(UserDto userDto)
@@ -153,7 +148,7 @@ namespace HousingAssociation.Services
                 throw new NotFoundException();
             }
             
-            _unitOfWork.UsersRepository.Update(user with {IsEnabled = false});
+            user.IsEnabled = false;
             await _unitOfWork.CommitAsync();
         }
         public async Task DeleteUser(int id)

@@ -56,10 +56,16 @@ namespace HousingAssociation.Services
             List<Building> buildings = new();
             foreach (var address in announcementDto.Addresses)
             {
-                var buildingsFromAddress = await _unitOfWork.BuildingsRepository.FindByAddressAsync(address);
+                var buildingsFromAddress = await _unitOfWork.BuildingsRepository.FindByAddressAsync(new Address() with
+                {
+                    City = address.City,
+                    District = address.District,
+                    Street = address.Street
+                });
                 buildings = buildings.Concat(buildingsFromAddress).Distinct().ToList();
             }
-            buildings.ForEach(b => _unitOfWork.SetModified(b));
+            announcementDto.Created = DateTimeOffset.Now;
+            _unitOfWork.SetModified(buildings);
             await AddAnnouncementWithBuildings(announcementDto, buildings);
         }
 
@@ -189,7 +195,6 @@ namespace HousingAssociation.Services
             }
 
             announcement.Cancelled = DateTimeOffset.Now;
-            _unitOfWork.AnnouncementsRepository.Update(announcement);
             await _unitOfWork.CommitAsync();
         }
 

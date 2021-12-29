@@ -24,11 +24,16 @@ namespace HousingAssociation.Services
                 Log.Warning("LocalDto is null");
                 throw new BadRequestException("Local mustn't be null.");
             }
+            if (localDto.BuildingId is null)
+            {
+                Log.Warning("BuildingId is null");
+                throw new BadRequestException("Local must be assigned to building");
+            }
             
             var local = new Local
             {
                 Number = localDto.Number,
-                BuildingId = localDto.BuildingId,
+                BuildingId = localDto.BuildingId!.Value,
                 Area = localDto.Area,
                 IsFullyOwned = localDto.IsFullyOwned ?? false
             };
@@ -56,8 +61,19 @@ namespace HousingAssociation.Services
 
         public async Task AddResidentToLocal(int localId, int residentId)
         {
-            var local = await _unitOfWork.LocalsRepository.FindByIdAsync(localId) ?? throw new NotFoundException();
-            var resident = await _unitOfWork.UsersRepository.FindByIdAsync(residentId) ?? throw new NotFoundException();
+            var local = await _unitOfWork.LocalsRepository.FindByIdAsync(localId);
+            if (local is null)
+            {
+                Log.Warning($"Local with id = {localId} not found");
+                throw new NotFoundException();
+            }
+
+            var resident = await _unitOfWork.UsersRepository.FindByIdAsync(residentId);
+            if (resident is null)
+            {
+                Log.Warning($"User with id = {residentId} not found");
+                throw new NotFoundException();
+            }
             
             if (local.Residents.Exists(r => r.Id == residentId))
             {
@@ -72,11 +88,24 @@ namespace HousingAssociation.Services
         
         public async Task RemoveResidentFromLocal(int localId, int residentId)
         {
-            var local = await _unitOfWork.LocalsRepository.FindByIdAsync(localId) ?? throw new NotFoundException();
-            var resident = await _unitOfWork.UsersRepository.FindByIdAsync(residentId) ?? throw new NotFoundException();
-            
+            var local = await _unitOfWork.LocalsRepository.FindByIdAsync(localId);
+            if (local is null)
+            {
+                Log.Warning($"Local with id = {localId} not found.");
+                throw new NotFoundException();
+            }
+
+            var resident = await _unitOfWork.UsersRepository.FindByIdAndIncludeAllLocalsAsync(residentId);
+            if (resident is null)
+            {
+                Log.Warning($"User with id = {residentId} not found.");
+                throw new NotFoundException();
+            }
+            //_unitOfWork.SetUnchanged(resident);
+
             local.Residents.Remove(resident);
-            _unitOfWork.LocalsRepository.Update(local);
+            _unitOfWork.SetModified(local.Residents);
+            //_unitOfWork.LocalsRepository.Update(local);
             await _unitOfWork.CommitAsync();
         }
         public async Task UpdateLocal(LocalDto localDto)
@@ -96,6 +125,17 @@ namespace HousingAssociation.Services
         {
             var locals = await _unitOfWork.LocalsRepository.FindAllByResidentId(residentId);
             return GetLocalsAsDtos(locals);
+        }
+        
+        public async Task<int> GetLocalIdByLocalDetails(LocalDto localDto)
+        {
+            var local = await _unitOfWork.LocalsRepository.FindByDetailsAsync(localDto);
+            if (local is null)
+            {
+                Log.Warning($"Trying to add local with current details: {localDto}");
+                throw new NotFoundException();
+            }
+            return local.Id;
         }
 
         public async Task DeleteLocalById(int id)

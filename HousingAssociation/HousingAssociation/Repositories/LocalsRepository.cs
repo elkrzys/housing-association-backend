@@ -29,6 +29,17 @@ namespace HousingAssociation.Repositories
                 .Include(local => local.Residents)
                 .SingleOrDefaultAsync(local => local.Id == id);
 
+        public async Task<Local> FindByDetailsAsync(LocalDto localDto)
+            => await _locals
+                .Include(local => local.Building)
+                .ThenInclude(building => building.Address)
+                .Where(local => local.Building.Address.City.Equals(localDto.Address.City) &&
+                                (string.IsNullOrEmpty(localDto.Address.District) || 
+                                 local.Building.Address.District.Equals(localDto.Address.District)) && 
+                                local.Building.Address.Street.Equals(localDto.Address.Street))
+                .FirstOrDefaultAsync(local =>
+                    local.Building.Number.Equals(localDto.BuildingNumber) && 
+                    local.Number.Equals(localDto.Number));
         public async Task<List<Local>> FindAllByIdsAsync(List<int> ids)
             => await _locals
                 .Where(local => ids.Any(id => local.Id == id))
@@ -45,7 +56,8 @@ namespace HousingAssociation.Repositories
         public async Task<List<Local>> FindAllByBuildingIdAsync(int buildingId)
             => await _locals
                 .Include(local => local.Residents)
-                .Where(local => local.BuildingId == buildingId).ToListAsync();
+                .Where(local => local.BuildingId == buildingId)
+                .ToListAsync();
         public async Task AddAsync(Local local) => await _locals.AddAsync(local);
         public void Update(Local local) => _locals.Update(local);
         public void Delete(Local local) => _locals.Remove(local);

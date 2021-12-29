@@ -41,6 +41,10 @@ namespace HousingAssociation.Repositories
         }
 
         public async Task<User> FindByIdAsync(int id) => await _users.FindAsync(id);
+        public async Task<User> FindByIdAsNoTrackingAsync(int id) 
+            => await _users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(user => user.Id == id);
         
         public async Task<List<User>> FindByRoleAsync(Role role)
             => await _users.Where(user => user.Role == role).ToListAsync();

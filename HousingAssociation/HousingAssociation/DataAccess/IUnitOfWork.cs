@@ -19,6 +19,7 @@ namespace HousingAssociation.DataAccess
         void Commit();
         Task CommitAsync();
         void SetModified<T>(T entity);
+        void SetUnchanged<T>(T entity);
         void SetModified<T>(List<T> entities);
         Task OuterTransaction(Func<Task> methodToInvoke);
     }
