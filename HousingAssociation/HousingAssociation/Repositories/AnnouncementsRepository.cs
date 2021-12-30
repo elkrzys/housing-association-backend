@@ -45,6 +45,8 @@ namespace HousingAssociation.Repositories
         public async Task<List<Announcement>> FindAllNotCancelledAsync() 
             => await _announcements
                 .Include(a => a.Author)
+                .Include(a => a.TargetBuildings)
+                    .ThenInclude(building => building.Address)
                 .Where(a => a.Cancelled == null)
                 .ToListAsync();
         public async Task<List<Announcement>> FindNotCancelledByTargetBuildingIdAsync(int buildingId)

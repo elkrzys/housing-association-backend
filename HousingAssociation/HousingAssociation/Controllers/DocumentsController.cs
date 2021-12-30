@@ -31,10 +31,16 @@ namespace HousingAssociation.Controllers
         }
         
         // admin, worker, resident
-        [HttpGet("user/{userId:int}")]
-        public async Task<IActionResult> GetDocumentByUserId(int userId)
+        [HttpGet("author/{authorId:int}")]
+        public async Task<IActionResult> GetDocumentsByAuthorId(int authorId)
         {
-            return Ok(await _documentsService.FindAllByAuthorId(userId));
+            return Ok(await _documentsService.FindAllByAuthorId(authorId));
+        }
+        
+        [HttpGet("receiver/{receiverId:int}")]
+        public async Task<IActionResult> GetDocumentsByReceiverId(int receiverId)
+        {
+            return Ok(await _documentsService.FindAllByReceiverId(receiverId));
         }
 
         //admin, worker, resident

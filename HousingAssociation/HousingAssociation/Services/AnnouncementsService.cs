@@ -77,9 +77,14 @@ namespace HousingAssociation.Services
                 throw new BadRequestException("Announcement incorrect");
             }
 
+            var cancelledId = announcementDto.Id!.Value;
+            announcementDto.Id = null;
+            announcementDto.PreviousAnnouncementId = cancelledId;
+
             await _unitOfWork.OuterTransaction(async () =>
             {
-                await CancelAnnouncementById(announcementDto.Id!.Value);
+                await CancelAnnouncementById(cancelledId);
+
                 if (announcementDto.TargetBuildingsIds.Any())
                 {
                     // foreach (var buildingId in announcementDto.TargetBuildingsIds)
@@ -217,7 +222,8 @@ namespace HousingAssociation.Services
                 Content = announcementDto.Content,
                 Title = announcementDto.Title,
                 ExpirationDate = announcementDto.ExpirationDate,
-                Type = announcementDto.Type
+                Type = announcementDto.Type,
+                PreviousAnnouncementId = announcementDto.PreviousAnnouncementId
             };
             
             if (await _unitOfWork.AnnouncementsRepository.CheckIfExistsAsync(announcement))

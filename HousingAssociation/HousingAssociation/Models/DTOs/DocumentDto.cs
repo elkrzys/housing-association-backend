@@ -7,7 +7,7 @@ namespace HousingAssociation.Models.DTOs
     {
         public int Id { get; set; }
         public string Title { get; set; }
-        public int AuthorId { get; set; }
+        public Author Author { get; set; }
         public string FilePath { get; set; }
         public DateTimeOffset Created { get; set; }
         public DateTimeOffset? Removes { get; set; }

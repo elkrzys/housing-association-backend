@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.Models.DTOs;
-using Microsoft.AspNetCore.Identity;
 
 namespace HousingAssociation.Utils.Extensions
 {
@@ -25,10 +23,15 @@ namespace HousingAssociation.Utils.Extensions
             {
                 Id = document.Id,
                 Title = document.Title,
-                AuthorId = document.AuthorId,
                 Created = document.Created,
                 Removes = document.Removes,
-                FilePath = document.Filepath
+                FilePath = document.Filepath,
+                Author = new Author
+                {
+                    Id = document.AuthorId, 
+                    FirstName = document.Author.FirstName,
+                    LastName = document.Author.LastName
+                }
             };
 
         public static AnnouncementDto AsDto(this Announcement announcement)
@@ -45,7 +48,9 @@ namespace HousingAssociation.Utils.Extensions
                 ExpirationDate = announcement.ExpirationDate,
                 Title = announcement.Title,
                 Type = announcement.Type,
-                Created = announcement.Created
+                Created = announcement.Created,
+                Addresses = announcement.TargetBuildings?.Select(building => building.Address.AsDto()).ToList(),
+                TargetBuildingsIds = announcement.TargetBuildings?.Select(building => building.Id).ToList()
             };
         
         public static BuildingDto AsDto(this Building building)
@@ -91,6 +96,14 @@ namespace HousingAssociation.Utils.Extensions
                 IsFullyOwned = local.IsFullyOwned,
                 NumberOfResidents = local.Residents?.Count,
                 Address = local.Building?.Address
+            };
+
+        public static AddressDto AsDto(this Address address)
+            => new AddressDto
+            {
+                City = address.City,
+                District = address.District,
+                Street = address.Street
             };
     }
 }

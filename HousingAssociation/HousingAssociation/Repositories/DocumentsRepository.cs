@@ -14,14 +14,17 @@ namespace HousingAssociation.Repositories
         {
             _documents = dbContext.Documents;
         }
-
         public async Task AddAsync(Document document) => await _documents.AddAsync(document);
         public async Task<List<Document>> FindAllAsync() => await _documents.ToListAsync();
         public async Task<Document> FindByIdAsync(int id) => await _documents.FindAsync(id);
         public async Task<List<Document>> FindAllByAuthorIdAsync(int authorId)
-            => await _documents.Where(document => document.AuthorId == authorId).ToListAsync();
+            => await _documents
+                .Include(document => document.Author)
+                .Where(document => document.AuthorId == authorId)
+                .ToListAsync();
         public async Task<List<Document>> FindAllByReceiverAsync(int receiverId)
             => await _documents
+                .Include(document => document.Author)
                 .Include(document => document.Receivers)
                 .Where(document => document.Receivers.Any(r => r.Id == receiverId))
                 .ToListAsync();
