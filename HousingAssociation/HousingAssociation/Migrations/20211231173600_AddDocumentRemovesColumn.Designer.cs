@@ -3,15 +3,17 @@ using System;
 using HousingAssociation.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace HousingAssociation.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211231173600_AddDocumentRemovesColumn")]
+    partial class AddDocumentRemovesColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,15 +42,15 @@ namespace HousingAssociation.Migrations
 
             modelBuilder.Entity("DocumentUser", b =>
                 {
-                    b.Property<int>("ReceivedDocumentsId")
+                    b.Property<int>("DocumentsId")
                         .HasColumnType("integer")
-                        .HasColumnName("received_documents_id");
+                        .HasColumnName("documents_id");
 
                     b.Property<int>("ReceiversId")
                         .HasColumnType("integer")
                         .HasColumnName("receivers_id");
 
-                    b.HasKey("ReceivedDocumentsId", "ReceiversId")
+                    b.HasKey("DocumentsId", "ReceiversId")
                         .HasName("pk_users_documents");
 
                     b.HasIndex("ReceiversId")
@@ -221,6 +223,7 @@ namespace HousingAssociation.Migrations
                         .HasName("pk_documents");
 
                     b.HasIndex("AuthorId")
+                        .IsUnique()
                         .HasDatabaseName("ix_documents_author_id");
 
                     b.ToTable("documents");
@@ -487,8 +490,8 @@ namespace HousingAssociation.Migrations
                 {
                     b.HasOne("HousingAssociation.DataAccess.Entities.Document", null)
                         .WithMany()
-                        .HasForeignKey("ReceivedDocumentsId")
-                        .HasConstraintName("fk_users_documents_documents_received_documents_id")
+                        .HasForeignKey("DocumentsId")
+                        .HasConstraintName("fk_users_documents_documents_documents_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -534,8 +537,8 @@ namespace HousingAssociation.Migrations
             modelBuilder.Entity("HousingAssociation.DataAccess.Entities.Document", b =>
                 {
                     b.HasOne("HousingAssociation.DataAccess.Entities.User", "Author")
-                        .WithMany("CreatedDocuments")
-                        .HasForeignKey("AuthorId")
+                        .WithOne("Document")
+                        .HasForeignKey("HousingAssociation.DataAccess.Entities.Document", "AuthorId")
                         .HasConstraintName("fk_documents_users_author_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -652,7 +655,7 @@ namespace HousingAssociation.Migrations
 
             modelBuilder.Entity("HousingAssociation.DataAccess.Entities.User", b =>
                 {
-                    b.Navigation("CreatedDocuments");
+                    b.Navigation("Document");
 
                     b.Navigation("Issues");
 

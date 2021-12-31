@@ -73,12 +73,23 @@ namespace HousingAssociation.Services
         public async Task AddNewDocument(UploadDocumentRequest request)
         {
             CheckIfDocumentFileIsValidOrThrowBadRequest(request.DocumentFile);
-            var documentMd5 = await GetMd5IfDocumentNotExists(request.DocumentFile);
-            var documentReceivers = await GetReceiversByIds(request.ReceiversIds);
-            
-            _unitOfWork.SetModified(documentReceivers);
+            var author = await _unitOfWork.UsersRepository.FindByIdAsync(request.AuthorId);
+            if (author is null)
+            {
+                Log.Warning($"User with id = {request.AuthorId} not found.");
+                throw new NotFoundException();
+            }
 
-            var path = await SaveFileAndReturnPath(request.DocumentFile);
+            var documentMd5 = await GetMd5IfDocumentNotExists(request.DocumentFile);
+           
+            List<User> documentReceivers = null;
+            if (author.Role is not Role.Resident)
+            {
+                documentReceivers = await GetReceiversByIds(request.ReceiversIds);
+                _unitOfWork.SetModified(documentReceivers);
+            }
+
+            var path = await SaveFileAndReturnFileName(request.DocumentFile);
             
             var document = new Document
             {
@@ -86,12 +97,20 @@ namespace HousingAssociation.Services
                 AuthorId = request.AuthorId,
                 Receivers = documentReceivers,
                 Created = DateTime.Now,
-                DaysToExpire = request.DaysToExpire,
+                Removes = request.Removes,
                 Md5 = documentMd5,
                 Filepath = path
             };
-            await _unitOfWork.DocumentsRepository.AddAsync(document);
-            await _unitOfWork.CommitAsync();
+            try
+            {
+                await _unitOfWork.DocumentsRepository.AddAsync(document);
+                await _unitOfWork.CommitAsync();
+            }
+            catch
+            {
+                DeleteFromFileSystem(path);
+            }
+           
         }
 
         private void CheckIfDocumentFileIsValidOrThrowBadRequest(IFormFile documentFile)
@@ -118,14 +137,14 @@ namespace HousingAssociation.Services
             var existingMd5s = await _unitOfWork.DocumentsRepository.FindAllDocumentHashes();
             string currentDocHash = null;
 
-            await using (var ms = new MemoryStream())
+            using (var ms = new MemoryStream())
             {
-                documentFile.CopyTo(ms);
+                await documentFile.CopyToAsync(ms);
                 var fileBytes = ms.ToArray();
-                
+                currentDocHash = HashGenerator.CalculateMd5StringFromBytes(fileBytes);
+
                 existingMd5s.ForEach(hash =>
                 {
-                    currentDocHash = HashGenerator.CalculateMd5StringFromBytes(fileBytes);
                     if(hash.Equals(currentDocHash))
                     {
                         Log.Warning($"File with exact hash already exists.");
@@ -146,26 +165,33 @@ namespace HousingAssociation.Services
             return receivers;
         }
 
-        private async Task<string> SaveFileAndReturnPath(IFormFile documentFile)
+        private async Task<string> SaveFileAndReturnFileName(IFormFile documentFile)
         {
             var randomFileName = Path.GetRandomFileName();
             var extension = Path.GetExtension(documentFile.FileName);
-            var path = Path.Combine(_webHostEnvironment.WebRootPath, "documents", randomFileName + extension);
-            
+            var fullFileName = randomFileName + extension;
+            var path = Path.Combine(_webHostEnvironment.WebRootPath, "documents", fullFileName);
             await using var fileStream = new FileStream(path, FileMode.Create);
             await documentFile.CopyToAsync(fileStream);
-            
-            return path;
+            return fullFileName;
         }
 
         public async Task DeleteById(int id)
         {
-            var document = await _unitOfWork.DocumentsRepository.FindByIdAsync(id) ?? throw new NotFoundException();
-            var path = document.Filepath;
-            
+            var document = await _unitOfWork.DocumentsRepository.FindByIdAsync(id);
+            if(document is null)
+            {
+                Log.Warning($"Document with id = {id} not found.");
+                throw new NotFoundException();
+            }
             _unitOfWork.DocumentsRepository.DeleteDocument(document);
             await _unitOfWork.CommitAsync();
-            
+            DeleteFromFileSystem(document.Filepath);
+        }
+
+        private void DeleteFromFileSystem(string filename)
+        {
+            var path = Path.Combine(_webHostEnvironment.WebRootPath, "documents", filename);
             if (File.Exists(path))
                 File.Delete(path);
         }
@@ -173,7 +199,7 @@ namespace HousingAssociation.Services
         private async Task<List<Document>> DeleteExpiredDocuments(List<Document> documents)
         {
             var expiredDocuments = documents.Where(d =>
-                d.DaysToExpire != null && DateTimeOffset.Now > d.Created.AddDays(d.DaysToExpire!.Value)).ToList();
+                d.Removes != null && DateTimeOffset.Now.Date >= d.Removes?.Date).ToList();
             documents.RemoveAll(d => expiredDocuments.Any(expired => expired.Id == d.Id));
             Log.Information($"Removed {expiredDocuments.Count} expired files");
             foreach (var expired in expiredDocuments)

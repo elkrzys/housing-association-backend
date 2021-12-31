@@ -39,13 +39,21 @@ namespace HousingAssociation.DataAccess
                     .HasForeignKey<UserCredentials>(c => c.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasMany(u => u.Documents)
+                entity.HasMany(u => u.ReceivedDocuments)
                     .WithMany(d => d.Receivers)
                     .UsingEntity(join => join.ToTable("users_documents"));
 
-                entity.HasOne(u => u.Document)
-                    .WithOne(d => d.Author)
-                    .HasForeignKey<Document>(d => d.AuthorId)
+                // entity.HasOne(u => u.Document)
+                //     .WithOne(d => d.Author)
+                //     .HasForeignKey<Document>(d => d.AuthorId)
+                //     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Document>(entity =>
+            {
+                entity.HasOne(d => d.Author)
+                    .WithMany(u => u.CreatedDocuments)
+                    .HasForeignKey(d => d.AuthorId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 

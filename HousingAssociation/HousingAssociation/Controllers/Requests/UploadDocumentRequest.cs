@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 
@@ -8,8 +9,8 @@ namespace HousingAssociation.Controllers.Requests
     {
         [Required] public int AuthorId { get; set; }
         [Required] public string Title { get; set; }
-        [Required] public List<int> ReceiversIds { get; set; }
+        public List<int> ReceiversIds { get; set; }
         [Required] public IFormFile DocumentFile { get; set; }
-        public int? DaysToExpire { get; set; }
+        public DateTimeOffset? Removes { get; set; }
     }
 }

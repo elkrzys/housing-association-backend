@@ -9,26 +9,12 @@ namespace HousingAssociation.DataAccess.Entities
     {
         [Key] public int Id { get; set; }
         public string Title { get; set; }
-        
-        [ForeignKey("Author")]
-        public int AuthorId { get; set; }
-        public User Author { get; set; }
-        public List<User> Receivers { get; set; }
+        [ForeignKey("Author")] public int AuthorId { get; set; }
         [Required] public DateTimeOffset Created { get; set; }
         [Required] public string Filepath { get; set; }
         [Required] public string Md5 { get; set; }
-        public int? DaysToExpire { get; set; }
-        public DateTimeOffset? Removes
-        {
-            get
-            {
-                if (DaysToExpire != null)
-                {
-                    return Created.AddDays(DaysToExpire.Value);
-                }
-                return null;
-            }   
-        }
-  
+        public DateTimeOffset? Removes { get; set; }
+        public User Author { get; set; }
+        public List<User> Receivers { get; set; }
     }
 }
