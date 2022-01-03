@@ -73,15 +73,15 @@ namespace HousingAssociation.Services
                 IsEnabled = true
             };
 
-            user = await _unitOfWork.UsersRepository.AddIfNotExists(user);
-            if (user.Id != 0)
+            var existingUser = await _unitOfWork.UsersRepository.FindByUserEmailAsync(user.Email);
+            if (existingUser is not null)
             {
-                Log.Warning($"User with id = {user.Id} already exists.");
+                Log.Warning($"User with id = {existingUser.Id} already exists.");
                 throw new BadRequestException("User already exists");
             }
-            
-            var password = PasswordGenerator.CreateRandomPassword();
 
+            await _unitOfWork.UsersRepository.AddAsync(user);
+            var password = PasswordGenerator.CreateRandomPassword();
             var credentials = new UserCredentials
             {
                 User = user,

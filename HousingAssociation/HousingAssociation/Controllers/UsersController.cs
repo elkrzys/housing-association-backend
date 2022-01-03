@@ -35,7 +35,7 @@ namespace HousingAssociation.Controllers
         public async Task<ActionResult<List<UserDto>>> GetWorkers()
             => Ok(await _usersService.FindAllWorkers());
 
-        [HttpPost("add-worker")]
+        [HttpPost("workers")]
         public async Task<IActionResult> AddNewWorker(UserDto userDto)
         {
             return Ok(await _usersService.AddWorker(userDto));
