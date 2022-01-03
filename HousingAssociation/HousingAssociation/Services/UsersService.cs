@@ -129,6 +129,7 @@ namespace HousingAssociation.Services
                 Log.Error($"User with id = {userId} doesn't exist.");
                 throw new NotFoundException();
             }
+
             if (!BCrypt.Net.BCrypt.Verify(request.OldPassword, credentials.PasswordHash))
             {
                 Log.Warning($"User with id = {userId} didn't match old password.");
@@ -138,16 +139,33 @@ namespace HousingAssociation.Services
             credentials.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
             await _unitOfWork.CommitAsync();
         }
-        public async Task DisableUser(UserDto userDto)
+        
+        public async Task DisableUser(int id, string password = null, bool removeCredentials = false)
         {
-            var user = await _unitOfWork.UsersRepository.FindByIdAsync(userDto.Id);
-
+            var user = await _unitOfWork.UsersRepository.FindByIdAsync(id);
             if (user is null)
             {
-                Log.Warning($"User with id = {userDto.Id} doesn't exist.");
+                Log.Warning($"User with id = {id} doesn't exist.");
                 throw new NotFoundException();
             }
-            
+            var credentials = await _unitOfWork.UserCredentialsRepository.FindByUserId(user.Id);
+            if (credentials is null)
+            {
+                Log.Warning($"Trying to disable user (id = {user.Id}) with no credentials.");
+                throw new NotFoundException();
+            }
+            if (password is not null)
+            {
+                if (!BCrypt.Net.BCrypt.Verify(password, credentials.PasswordHash))
+                {
+                    Log.Warning($"Attempt to disable user with id = {id} with incorrect password given.");
+                    throw new BadRequestException();
+                }
+            }
+            if (removeCredentials)
+            {
+                _unitOfWork.UserCredentialsRepository.Delete(credentials);
+            }
             user.IsEnabled = false;
             await _unitOfWork.CommitAsync();
         }

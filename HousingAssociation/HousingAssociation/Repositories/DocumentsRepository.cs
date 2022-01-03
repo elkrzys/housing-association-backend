@@ -22,6 +22,18 @@ namespace HousingAssociation.Repositories
                 .Include(document => document.Author)
                 .Where(document => document.AuthorId == authorId)
                 .ToListAsync();
+        public async Task<List<Document>> FindAllWhereReceiversNotEmpty()
+            => await _documents
+                .Include(document => document.Author)
+                .Include(document => document.Receivers)
+                .Where(document => document.Receivers.Count > 0)
+                .ToListAsync();
+        public async Task<List<Document>> FindAllWhereReceiversEmpty()
+            => await _documents
+                .Include(document => document.Author)
+                .Include(document => document.Receivers)
+                .Where(document => document.Receivers.Count == 0)
+                .ToListAsync();
         public async Task<List<Document>> FindAllByReceiverAsync(int receiverId)
             => await _documents
                 .Include(document => document.Author)

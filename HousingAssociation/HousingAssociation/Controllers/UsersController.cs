@@ -13,6 +13,7 @@ namespace HousingAssociation.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UsersService _usersService;
+
         public UsersController(UsersService usersService)
         {
             _usersService = usersService;
@@ -21,17 +22,17 @@ namespace HousingAssociation.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetUser(int id)
             => Ok(await _usersService.FindUserById(id));
-        
+
         [HttpGet("not-enabled")]
-        public async Task<ActionResult<List<UserDto>>> GetUnconfirmedUsers() 
+        public async Task<ActionResult<List<UserDto>>> GetUnconfirmedUsers()
             => Ok(await _usersService.FindUnconfirmedUsers());
-        
+
         [HttpGet("residents")]
-        public async Task<ActionResult<List<UserDto>>> GetResidents() 
+        public async Task<ActionResult<List<UserDto>>> GetResidents()
             => Ok(await _usersService.FindAllResidents());
-        
+
         [HttpGet("workers")]
-        public async Task<ActionResult<List<UserDto>>> GetWorkers() 
+        public async Task<ActionResult<List<UserDto>>> GetWorkers()
             => Ok(await _usersService.FindAllWorkers());
 
         [HttpPost("add-worker")]
@@ -41,10 +42,16 @@ namespace HousingAssociation.Controllers
         }
 
         [HttpPut("unregister/{id:int}")]
-        public async Task<IActionResult> UnregisterUser(int id, UserDto userDto)
+        public async Task<IActionResult> UnregisterUser(int id, [FromBody] string password)
         {
-            userDto.Id = id;
-            await _usersService.DisableUser(userDto);
+            await _usersService.DisableUser(id, password, true);
+            return Ok();
+        }
+        
+        [HttpPut("ban/{id:int}")]
+        public async Task<IActionResult> BanUser(int id)
+        {
+            await _usersService.DisableUser(id);
             return Ok();
         }
 

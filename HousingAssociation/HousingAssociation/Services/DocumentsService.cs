@@ -69,6 +69,18 @@ namespace HousingAssociation.Services
             var documents = await _unitOfWork.DocumentsRepository.FindAllByReceiverAsync(receiverId);
             return DocumentsToDocumentsDtos(documents);
         }
+        
+        public async Task<List<DocumentDto>> FindAllSendByAssociation()
+        {
+            var documents = await _unitOfWork.DocumentsRepository.FindAllWhereReceiversNotEmpty();
+            return DocumentsToDocumentsDtos(documents);
+        }
+        
+        public async Task<List<DocumentDto>> FindAllSendByResidents()
+        {
+            var documents = await _unitOfWork.DocumentsRepository.FindAllWhereReceiversEmpty();
+            return DocumentsToDocumentsDtos(documents);
+        }
 
         public async Task AddNewDocument(UploadDocumentRequest request)
         {

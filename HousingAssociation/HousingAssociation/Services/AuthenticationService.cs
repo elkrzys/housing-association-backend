@@ -7,6 +7,7 @@ using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.ExceptionHandling.Exceptions;
 using HousingAssociation.Utils.Jwt.JwtUtils;
+using Serilog;
 
 namespace HousingAssociation.Services
 {
@@ -23,7 +24,7 @@ namespace HousingAssociation.Services
             _jwtConfig = jwtConfig;
         }
         
-        public async Task<User> RegisterUser(RegisterRequest request)
+        public async Task RegisterUser(RegisterRequest request)
         {
             var user = new User
             {
@@ -32,21 +33,44 @@ namespace HousingAssociation.Services
                 PhoneNumber = request.PhoneNumber,
                 Email = request.Email,
                 Role = Role.Resident,
-                IsEnabled = false
+                IsEnabled = true
             };
-            
-            user = await _unitOfWork.UsersRepository.AddIfNotExists(user) ?? throw new BadRequestException("User already exists!");
-
             var credentials = new UserCredentials
             {
-                User = user,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
             };
+            var existingUser = await GetUserOrNullIfRegistrationPossible(user);
+            if (existingUser is not null)
+            {
+                existingUser.IsEnabled = true;
+                credentials.User = existingUser;
+            }
+            else
+            {
+                await _unitOfWork.UsersRepository.AddAsync(user);
+                credentials.User = user;
+            }
             
             await _unitOfWork.UserCredentialsRepository.Add(credentials);
             await _unitOfWork.CommitAsync();
+        }
+
+        private async Task<User> GetUserOrNullIfRegistrationPossible(User user)
+        {
+            var existingUser = await _unitOfWork.UsersRepository.FindByUserEmailAsync(user.Email);
+            if (existingUser is null) return null;
             
-            return user;
+            if (existingUser.IsEnabled)
+            {
+                Log.Warning($"Trying to register user with data of user with id = {existingUser.Id}");
+                throw new BadRequestException("User already exists!");
+            }
+            if (existingUser.UserCredentials is not null)
+            {
+                Log.Warning($"Trying to register banned user. User id = {existingUser.Id}");
+                throw new BadRequestException("User banned!");
+            }
+            return existingUser;
         }
         
         public async Task<LoginResponse> Login(LoginRequest request)

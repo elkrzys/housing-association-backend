@@ -19,29 +19,33 @@ namespace HousingAssociation.Controllers
         // admin, worker
         [HttpGet]
         public async Task<IActionResult> GetAllDocuments()
-        {
-            return Ok(await _documentsService.FindAll());
-        }
+            => Ok(await _documentsService.FindAll());
         
-        // admin, worker, resident
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetDocumentById(int id)
-        {
-            return Ok(await _documentsService.FindById(id));
-        }
+        
+        // // admin, worker, resident
+        // [HttpGet("{id:int}")]
+        // public async Task<IActionResult> GetDocumentById(int id)
+        // {
+        //     return Ok(await _documentsService.FindById(id));
+        // }
         
         // admin, worker, resident
         [HttpGet("author/{authorId:int}")]
         public async Task<IActionResult> GetDocumentsByAuthorId(int authorId)
-        {
-            return Ok(await _documentsService.FindAllByAuthorId(authorId));
-        }
+            => Ok(await _documentsService.FindAllByAuthorId(authorId));
+
+        [HttpGet("all-from-association")]
+        public async Task<IActionResult> GetAllAssociationDocuments()
+            => Ok(await _documentsService.FindAllSendByAssociation());
+        
+        [HttpGet("all-from-residents")]
+        public async Task<IActionResult> GetAllFromResidents()
+            => Ok(await _documentsService.FindAllSendByResidents());
         
         [HttpGet("receiver/{receiverId:int}")]
         public async Task<IActionResult> GetDocumentsByReceiverId(int receiverId)
-        {
-            return Ok(await _documentsService.FindAllByReceiverId(receiverId));
-        }
+            => Ok(await _documentsService.FindAllByReceiverId(receiverId));
+        
 
         //admin, worker, resident
         [HttpPost]

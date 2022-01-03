@@ -35,17 +35,17 @@ namespace HousingAssociation.Repositories
             return existingUser;
         }
 
-        public void Update(User user)
-        {
-            _users.Update(user);
-        }
+        public async Task<User> FindByDetailsWithCredentials(User user) 
+            => await _users
+                .Include(u => u.UserCredentials)
+                .FirstOrDefaultAsync(u => u.FirstName.Equals(user.FirstName) && u.LastName.Equals(user.LastName) && 
+                                          u.Email.Equals(user.Email) && u.PhoneNumber.Equals(user.PhoneNumber));
+        
+        public void Update(User user) => _users.Update(user);
+        public async Task AddAsync(User user) => await _users.AddAsync(user);
 
         public async Task<User> FindByIdAsync(int id) => await _users.FindAsync(id);
-        public async Task<User> FindByIdAsNoTrackingAsync(int id) 
-            => await _users
-                .AsNoTracking()
-                .FirstOrDefaultAsync(user => user.Id == id);
-        
+
         public async Task<List<User>> FindByRoleAsync(Role role)
             => await _users.Where(user => user.Role == role).ToListAsync();
         
