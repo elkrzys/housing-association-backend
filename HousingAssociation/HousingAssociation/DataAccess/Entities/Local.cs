@@ -13,9 +13,7 @@ namespace HousingAssociation.DataAccess.Entities
         [ForeignKey("Building")] public int BuildingId { get; set; }
         public bool IsFullyOwned { get; set; }
         public List<User> Residents { get; set; }
-        public List<User> Owners { get; set; }
         public List<Issue> Issues { get; set; }
-        
         public Building Building { get; set; }
         
     }

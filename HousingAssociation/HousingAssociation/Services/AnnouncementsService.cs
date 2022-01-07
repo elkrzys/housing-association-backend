@@ -84,24 +84,12 @@ namespace HousingAssociation.Services
             await _unitOfWork.OuterTransaction(async () =>
             {
                 await CancelAnnouncementById(cancelledId);
-
                 if (announcementDto.TargetBuildingsIds.Any())
                 {
-                    // foreach (var buildingId in announcementDto.TargetBuildingsIds)
-                    // {
-                    //     var building = await _unitOfWork.BuildingsRepository.FindByIdAsync(buildingId);
-                    //     if(building is not null)
-                    //         buildings.Add(building);
-                    // }
                     await AddAnnouncementByBuildingsIds(announcementDto);
                 }
                 else if (announcementDto.Addresses.Any())
                 {
-                    // foreach (var address in announcementDto.Addresses)
-                    // {
-                    //     var buildingsFromAddress = await _unitOfWork.BuildingsRepository.FindByAddressAsync(address);
-                    //     buildings = buildings.Concat(buildingsFromAddress).Distinct().ToList();
-                    // }
                     await AddAnnouncementByAddress(announcementDto);
                 }
                 else
@@ -160,10 +148,7 @@ namespace HousingAssociation.Services
                 throw new NotFoundException();
             }
 
-            var receiverLocals = receiver.ResidedLocals
-                .Concat(receiver.OwnedLocals)
-                .Distinct()
-                .ToList();
+            var receiverLocals = receiver.ResidedLocals;
             
             List<Announcement> announcements = new();
             foreach (var local in receiverLocals)

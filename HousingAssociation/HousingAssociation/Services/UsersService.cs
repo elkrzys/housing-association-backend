@@ -28,12 +28,6 @@ namespace HousingAssociation.Services
             _emailService = emailService;
         }
 
-        public async Task<List<UserDto>> FindUnconfirmedUsers()
-        {
-            var users = await _unitOfWork.UsersRepository.FindAllNotEnabledUsersAsync();
-            return GetUsersAsDtos(users);
-        }
-        
         public async Task<List<UserDto>> FindAllResidents()
         {
             var users = await _unitOfWork.UsersRepository.FindByRoleAsync(Role.Resident);
@@ -46,21 +40,7 @@ namespace HousingAssociation.Services
             return GetUsersAsDtos(users);
         }
         public async Task<UserDto> FindUserById(int id) => (await _unitOfWork.UsersRepository.FindByIdAsync(id)).AsDto();
-        public async Task<UserDto> ConfirmUser(int id)
-        {
-            var user = await _unitOfWork.UsersRepository.FindByIdAsync(id);
-            if (user is null)
-            {
-                Log.Warning($"User with id = {id} doesn't exist.");
-                throw new NotFoundException();
-            }
-            
-            user.IsEnabled = true;
-            await _unitOfWork.CommitAsync();
-            
-            return user.AsDto();
-        }
-
+       
         public async Task<UserDto> AddWorker(UserDto userDto)
         {
             var user = new User

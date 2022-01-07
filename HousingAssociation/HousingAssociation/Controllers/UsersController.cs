@@ -22,11 +22,7 @@ namespace HousingAssociation.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetUser(int id)
             => Ok(await _usersService.FindUserById(id));
-
-        [HttpGet("not-enabled")]
-        public async Task<ActionResult<List<UserDto>>> GetUnconfirmedUsers()
-            => Ok(await _usersService.FindUnconfirmedUsers());
-
+        
         [HttpGet("residents")]
         public async Task<ActionResult<List<UserDto>>> GetResidents()
             => Ok(await _usersService.FindAllResidents());
@@ -60,12 +56,6 @@ namespace HousingAssociation.Controllers
         {
             await _usersService.Update(user with {Id = id});
             return Ok();
-        }
-
-        [HttpPut("confirm/{id:int}")]
-        public async Task<IActionResult> ConfirmUser(int id)
-        {
-            return Ok(await _usersService.ConfirmUser(id));
         }
 
         [HttpPut("{id:int}/change-password")]

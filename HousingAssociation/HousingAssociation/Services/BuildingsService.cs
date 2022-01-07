@@ -36,7 +36,7 @@ namespace HousingAssociation.Services
             return building.AsDto();
         }
 
-        public async Task AddBuildingWithAddress(BuildingDto buildingDto)
+        public async Task<int> AddBuildingWithAddress(BuildingDto buildingDto)
         {
             var address = await _unitOfWork.AddressesRepository.AddNewAddressOrReturnExisting(buildingDto.Address);
             var building = new Building
@@ -63,6 +63,7 @@ namespace HousingAssociation.Services
             
             await _unitOfWork.BuildingsRepository.AddAsync(building);
             await _unitOfWork.CommitAsync();
+            return building.Id;
         }
         public async Task<List<BuildingDto>> GetAllBuildingsByAddress(Address address)
         {

@@ -20,7 +20,6 @@ namespace HousingAssociation.DataAccess
         public virtual DbSet<Announcement> Announcements { get; set; }
         public virtual DbSet<Issue> Issues { get; set; }
         public virtual DbSet<Document> Documents { get; set; }
-        //public virtual DbSet<AnnouncementBuilding> AnnouncementBuildings { get; set; }
 
         // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //     => optionsBuilder.UseSnakeCaseNamingConvention().UseEnumCheckConstraints();
@@ -70,10 +69,6 @@ namespace HousingAssociation.DataAccess
                 entity.HasMany(l => l.Residents)
                     .WithMany(u => u.ResidedLocals)
                     .UsingEntity(join => join.ToTable("locals_residents"));
-
-                entity.HasMany(l => l.Owners)
-                    .WithMany(u => u.OwnedLocals)
-                    .UsingEntity(join => join.ToTable("locals_owners"));
             });
             
             modelBuilder.Entity<Building>()

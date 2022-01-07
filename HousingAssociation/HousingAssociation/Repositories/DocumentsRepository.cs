@@ -40,11 +40,11 @@ namespace HousingAssociation.Repositories
                 .Include(document => document.Receivers)
                 .Where(document => document.Receivers.Any(r => r.Id == receiverId))
                 .ToListAsync();
-        public async Task<List<User>> FindReceiversByDocumentIdAsync(int id) 
-            => (await _documents
-                .Include(d => d.Receivers)
-                .SingleAsync(d => d.Id == id))
-                .Receivers;
+        public async Task<Document> FindByHashAsync(string hash)
+            => await _documents
+                .Include(document => document.Author)
+                .Include(document => document.Receivers)
+                .SingleOrDefaultAsync(document => document.Md5.Equals(hash));
         public async Task<List<string>> FindAllDocumentHashes()
             => await _documents.Select(d => d.Md5).ToListAsync();
         public void DeleteDocument(Document document) => _documents.Remove(document);

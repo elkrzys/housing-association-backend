@@ -36,9 +36,6 @@ namespace HousingAssociation.ExceptionHandling
         /// </summary>
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            //TODO: Clear this code.
-            //var exceptionType = exception.GetType();
-
             switch (exception)
             {
                     case NotFoundException:
@@ -59,14 +56,6 @@ namespace HousingAssociation.ExceptionHandling
                         context.Response.ContentType = "application/json";
                         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                         break;
-                    // context.Response.ContentType = "application/json";
-                        // context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                        // await context.Response.WriteAsJsonAsync(new
-                        // {
-                        //     //context.Response.StatusCode,
-                        //     exception.Message,
-                        //     exception.Source
-                        // });
             }
 
             // if(exceptionType == typeof(NotFoundException))

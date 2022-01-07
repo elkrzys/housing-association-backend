@@ -11,11 +11,5 @@ namespace HousingAssociation.Utils
             var hashBytes = md5Hash.ComputeHash(file);
             return BitConverter.ToString(hashBytes).Replace("-", string.Empty);
         }
-
-        public static string GetHashIfNotEqual(this byte[] file, string hash)
-        {
-            var fileHash = CalculateMd5StringFromBytes(file);
-            return fileHash != hash ? fileHash : null;
-        }
     }
 }

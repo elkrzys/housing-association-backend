@@ -14,12 +14,9 @@ namespace HousingAssociation.DataAccess.Entities
         [Required] [MaxLength(255)] public string Email { get; set; }
         [Required] public Role Role { get; set; }
         [Required] public bool IsEnabled { get; set; }
-        public List<Local> OwnedLocals { get; set; }
         public List<Local> ResidedLocals { get; set; }
         public UserCredentials UserCredentials { get; set; }
-        
-        [JsonIgnore] public List<RefreshToken> RefreshTokens { get; set; }
-        
+        public List<RefreshToken> RefreshTokens { get; set; }
         public List<Document> ReceivedDocuments { get; set; }
         public List<Document> CreatedDocuments { get; set; }
         public List<Issue> Issues { get; set; }

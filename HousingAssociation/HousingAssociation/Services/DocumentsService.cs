@@ -92,7 +92,13 @@ namespace HousingAssociation.Services
                 throw new NotFoundException();
             }
 
-            var documentMd5 = await GetMd5IfDocumentNotExists(request.DocumentFile);
+            var documentMd5 = await GetMd5(request.DocumentFile);
+            var existingDocument = await _unitOfWork.DocumentsRepository.FindByHashAsync(documentMd5);
+            if (existingDocument is not null)
+            {
+                await UpdateReceivers(existingDocument, request.ReceiversIds);
+                return;
+            }
            
             List<User> documentReceivers = null;
             if (author.Role is not Role.Resident)
@@ -122,7 +128,6 @@ namespace HousingAssociation.Services
             {
                 DeleteFromFileSystem(path);
             }
-           
         }
 
         private void CheckIfDocumentFileIsValidOrThrowBadRequest(IFormFile documentFile)
@@ -144,27 +149,25 @@ namespace HousingAssociation.Services
         private List<DocumentDto> DocumentsToDocumentsDtos(List<Document> documents) 
             => documents.Select(document => document.AsDto()).ToList();
 
-        private async Task<string> GetMd5IfDocumentNotExists(IFormFile documentFile)
+        private async Task<string> GetMd5(IFormFile documentFile)
         {
-            var existingMd5s = await _unitOfWork.DocumentsRepository.FindAllDocumentHashes();
             string currentDocHash = null;
-
             using (var ms = new MemoryStream())
             {
                 await documentFile.CopyToAsync(ms);
                 var fileBytes = ms.ToArray();
                 currentDocHash = HashGenerator.CalculateMd5StringFromBytes(fileBytes);
-
-                existingMd5s.ForEach(hash =>
-                {
-                    if(hash.Equals(currentDocHash))
-                    {
-                        Log.Warning($"File with exact hash already exists.");
-                        throw new BadRequestException("File already exists");
-                    }
-                });
             }
             return currentDocHash;
+        }
+
+        private async Task UpdateReceivers(Document document, List<int> receiversIds)
+        {
+            var newReceivers = await GetReceiversByIds(receiversIds);
+            var concatReceivers = document.Receivers.Concat(newReceivers).Distinct().ToList();
+            _unitOfWork.SetModified(concatReceivers);
+            document.Receivers = concatReceivers;
+            await _unitOfWork.CommitAsync();
         }
 
         private async Task<List<User>> GetReceiversByIds(List<int> ids)

@@ -9,41 +9,21 @@ namespace HousingAssociation.DataAccess
 {
     public class UnitOfWork : IUnitOfWork
     {
-        public AppDbContext Context { get; }
-
+        private readonly AppDbContext _context;
         public UnitOfWork(AppDbContext context)
         {
-            Context = context;
+            _context = context;
         }
-        public void Commit()
-        {
-            Context.SaveChanges();
-        }
-
-        public async Task CommitAsync()
-        {
-            await Context.SaveChangesAsync();
-        }
-
-        public void SetModified<T>(T entity)
-        {
-            Context.Entry(entity).State = EntityState.Modified;
-        }
-        public void SetUnchanged<T>(T entity)
-        {
-            Context.Entry(entity).State = EntityState.Unchanged;
-        }
-        public void SetModified<T>(List<T> entities)
-        {
-            entities.ForEach(entity => Context.Entry(entity).State = EntityState.Modified);
-        }
+        public async Task CommitAsync() => await _context.SaveChangesAsync();
+        public void SetModified<T>(T entity) => _context.Entry(entity).State = EntityState.Modified;
+        public void SetModified<T>(List<T> entities) => entities.ForEach(entity => _context.Entry(entity).State = EntityState.Modified);
 
         public async Task OuterTransaction(Func<Task> methodToInvoke)
         {
-            await Context.Database.BeginTransactionAsync();
+            await _context.Database.BeginTransactionAsync();
             await methodToInvoke();
-            await Context.SaveChangesAsync();
-            await Context.Database.CommitTransactionAsync();
+            await _context.SaveChangesAsync();
+            await _context.Database.CommitTransactionAsync();
         }
 
         private AddressesRepository _addressesRepository;
@@ -54,13 +34,13 @@ namespace HousingAssociation.DataAccess
         private AnnouncementsRepository _announcementsRepository;
         private DocumentsRepository _documentsRepository;
         private IssuesRepository _issuesRepository;
-        public AddressesRepository AddressesRepository => _addressesRepository ??= new AddressesRepository(Context);
-        public BuildingsRepository BuildingsRepository => _buildingsRepository ??= new BuildingsRepository(Context);
-        public LocalsRepository LocalsRepository => _localsRepository ??= new LocalsRepository(Context);
-        public UsersRepository UsersRepository => _usersRepository ??= new UsersRepository(Context);
-        public UserCredentialsRepository UserCredentialsRepository => _usersCredentialsRepository ??= new UserCredentialsRepository(Context);
-        public AnnouncementsRepository AnnouncementsRepository => _announcementsRepository ??= new AnnouncementsRepository(Context);
-        public DocumentsRepository DocumentsRepository => _documentsRepository ??= new DocumentsRepository(Context);
-        public IssuesRepository IssuesRepository => _issuesRepository ??= new IssuesRepository(Context);
+        public AddressesRepository AddressesRepository => _addressesRepository ??= new AddressesRepository(_context);
+        public BuildingsRepository BuildingsRepository => _buildingsRepository ??= new BuildingsRepository(_context);
+        public LocalsRepository LocalsRepository => _localsRepository ??= new LocalsRepository(_context);
+        public UsersRepository UsersRepository => _usersRepository ??= new UsersRepository(_context);
+        public UserCredentialsRepository UserCredentialsRepository => _usersCredentialsRepository ??= new UserCredentialsRepository(_context);
+        public AnnouncementsRepository AnnouncementsRepository => _announcementsRepository ??= new AnnouncementsRepository(_context);
+        public DocumentsRepository DocumentsRepository => _documentsRepository ??= new DocumentsRepository(_context);
+        public IssuesRepository IssuesRepository => _issuesRepository ??= new IssuesRepository(_context);
     }
 }
