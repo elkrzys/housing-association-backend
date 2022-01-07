@@ -1,6 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
+using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.Models.DTOs;
 using HousingAssociation.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HousingAssociation.Controllers
@@ -15,20 +18,20 @@ namespace HousingAssociation.Controllers
             _announcementsService = announcementsService;
         }
 
-        // worker, admin
+        [Authorize(Roles = "Worker")]
         [HttpGet]
         public async Task<IActionResult> GetAllAnnouncements() => Ok(await _announcementsService.GetAll());
         
-        // worker, admin
+        [Authorize(Roles = "Worker")]
         [HttpGet("not-cancelled")]
         public async Task<IActionResult> GetAllNotCancelledAnnouncements() => Ok(await _announcementsService.GetAll());
         
-        // resident
+        [Authorize(Roles = "Resident")]
         [HttpGet("receiver/{receiverId:int}")]
         public async Task<IActionResult> GetAllAnnouncementsByReceiverId(int receiverId)
             => Ok(await _announcementsService.GetAllByReceiverId(receiverId));
 
-        // worker, admin
+        [Authorize(Roles = "Worker")]
         [HttpGet("author/{authorId:int}")]
         public async Task<IActionResult> GetAllAnnouncementsByAuthorId(int authorId)
             => Ok(await _announcementsService.GetAllByAuthorId(authorId));
@@ -40,7 +43,7 @@ namespace HousingAssociation.Controllers
         //     return Ok(await _announcementsService.GetAllFiltered(filter));
         // }
 
-        // worker, admin
+        [Authorize(Roles = "Worker")]
         [HttpPost("add-by-address")]
         public async Task<IActionResult> AddByAddress(AnnouncementDto announcement)
         {
@@ -48,6 +51,7 @@ namespace HousingAssociation.Controllers
             return Ok();
         }
         
+        [Authorize(Roles = "Worker")]
         [HttpPost("add-by-buildings")]
         public async Task<IActionResult> AddByBuildingsIds(AnnouncementDto announcement)
         {
@@ -55,7 +59,7 @@ namespace HousingAssociation.Controllers
             return Ok();
         }
         
-        // worker, admin
+        [Authorize(Roles = "Worker")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, AnnouncementDto announcement)
         { 
@@ -64,7 +68,7 @@ namespace HousingAssociation.Controllers
             return Ok();
         }
         
-        // worker, admin
+        [Authorize(Roles = "Worker")]
         [HttpPut("cancel/{id:int}")]
         public async Task<IActionResult> Cancel(int id)
         {
