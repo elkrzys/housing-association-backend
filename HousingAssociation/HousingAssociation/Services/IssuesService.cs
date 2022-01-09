@@ -86,7 +86,14 @@ namespace HousingAssociation.Services
         
         public async Task<List<IssueDto>> GetAllByAuthorId(int authorId)
         {
-            var issues = await _unitOfWork.IssuesRepository.FindAllByAuthorIdAsync(authorId);
+            var author = await _unitOfWork.UsersRepository.FindByIdAndIncludeAllLocalsAsync(authorId);
+            if (author is null)
+            {
+                Log.Warning($"Issue author with id = {authorId} not found.");
+                throw new NotFoundException();
+            }
+            var localsIds = author.ResidedLocals.Select(local => local.Id);
+            var issues = await _unitOfWork.IssuesRepository.FindAllByResidentLocals(localsIds);
             return GetIssuesAsDtos(issues);
         }
         

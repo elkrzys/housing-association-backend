@@ -91,7 +91,7 @@ namespace HousingAssociation.Services
                 Log.Warning($"User with id = {request.AuthorId} not found.");
                 throw new NotFoundException();
             }
-
+            
             var documentMd5 = await GetMd5(request.DocumentFile);
             var existingDocument = await _unitOfWork.DocumentsRepository.FindByHashAsync(documentMd5);
             if (existingDocument is not null)
@@ -103,7 +103,14 @@ namespace HousingAssociation.Services
             List<User> documentReceivers = null;
             if (author.Role is not Role.Resident)
             {
-                documentReceivers = await GetReceiversByIds(request.ReceiversIds);
+                if (request.ReceiversIds is not null)
+                {
+                    documentReceivers = await GetReceiversByIds(request.ReceiversIds);
+                }
+                else
+                {
+                    documentReceivers = await _unitOfWork.UsersRepository.FindByRoleAsync(Role.Resident);
+                }
                 _unitOfWork.SetModified(documentReceivers);
             }
 

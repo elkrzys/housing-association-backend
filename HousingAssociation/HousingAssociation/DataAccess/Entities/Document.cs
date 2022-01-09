@@ -8,7 +8,7 @@ namespace HousingAssociation.DataAccess.Entities
     public class Document
     {
         [Key] public int Id { get; set; }
-        public string Title { get; set; }
+        [Required][MaxLength(255)] public string Title { get; set; }
         [ForeignKey("Author")] public int AuthorId { get; set; }
         [Required] public DateTimeOffset Created { get; set; }
         [Required] public string Filepath { get; set; }

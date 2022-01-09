@@ -11,7 +11,6 @@ namespace HousingAssociation.Models.DTOs
         public int? Id { get; set; }
         
         public int? PreviousAnnouncementId { get; set; }
-        [Required] public AnnouncementType Type { get; set; }
         [MaxLength(255)] public string Title { get; set; }
         [MaxLength(255)] public string Content { get; set; }
         public DateTimeOffset Created { get; set; }

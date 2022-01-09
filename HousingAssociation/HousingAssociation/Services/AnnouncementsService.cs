@@ -114,6 +114,7 @@ namespace HousingAssociation.Services
 
         public async Task<List<AnnouncementDto>> GetAll()
         {
+            await _unitOfWork.AnnouncementsRepository.CancelOldAnnouncements();
             var announcements = await _unitOfWork.AnnouncementsRepository.FindAllNotCancelledAsync();
             return GetAnnouncementsAsDtos(announcements);
         }
@@ -142,6 +143,7 @@ namespace HousingAssociation.Services
 
         public async Task<List<AnnouncementDto>> GetAllByReceiverId(int receiverId)
         {
+            await _unitOfWork.AnnouncementsRepository.CancelOldAnnouncements();
             var receiver = await _unitOfWork.UsersRepository.FindByIdAndIncludeAllLocalsAsync(receiverId); 
             if(receiver is null){               
                 Log.Warning($"User with id = {receiverId} doesn't exists.");
@@ -166,6 +168,7 @@ namespace HousingAssociation.Services
 
         public async Task<List<AnnouncementDto>> GetAllByAuthorId(int authorId)
         {
+            await _unitOfWork.AnnouncementsRepository.CancelOldAnnouncements();
             if (await _unitOfWork.UsersRepository.FindByIdAsync(authorId) is null)
             {
                 Log.Warning($"User with id = {authorId} doesn't exist.");
@@ -207,7 +210,6 @@ namespace HousingAssociation.Services
                 Content = announcementDto.Content,
                 Title = announcementDto.Title,
                 ExpirationDate = announcementDto.ExpirationDate,
-                Type = announcementDto.Type,
                 PreviousAnnouncementId = announcementDto.PreviousAnnouncementId
             };
             

@@ -47,7 +47,6 @@ namespace HousingAssociation.Utils.Extensions
                 Content = announcement.Content,
                 ExpirationDate = announcement.ExpirationDate,
                 Title = announcement.Title,
-                Type = announcement.Type,
                 Created = announcement.Created,
                 Addresses = announcement.TargetBuildings?.Select(building => building.Address.AsDto()).ToList(),
                 TargetBuildingsIds = announcement.TargetBuildings?.Select(building => building.Id).ToList()
@@ -68,7 +67,6 @@ namespace HousingAssociation.Utils.Extensions
             => new IssueDto
             {
                 Id = issue.Id,
-                //AuthorId = issue.AuthorId,
                 Title = issue.Title,
                 Content = issue.Content,
                 Created = issue.Created.ToString("yyyy-MM-ddTHH:mm:ss"),
@@ -93,7 +91,6 @@ namespace HousingAssociation.Utils.Extensions
                 BuildingNumber = local.Building?.Number,
                 Area = local.Area,
                 Number = local.Number,
-                IsFullyOwned = local.IsFullyOwned,
                 NumberOfResidents = local.Residents?.Count,
                 Address = local.Building?.Address
             };

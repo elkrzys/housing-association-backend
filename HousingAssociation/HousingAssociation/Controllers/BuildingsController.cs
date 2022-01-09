@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.Models.DTOs;
 using HousingAssociation.Services;
@@ -27,6 +28,10 @@ namespace HousingAssociation.Controllers
         [HttpGet("address/{city}/{street}/{district?}")]
         public async Task<IActionResult> GetAllBuildingsByAddress(string city = "", string street = "", string district = "")
             => Ok(await _buildingsService.GetAllBuildingsByAddress(new Address {City = city, District = district, Street = street}));
+        
+        [HttpPost("get-all-by-ids")]
+        public async Task<IActionResult> GetAllBuildingsByAddress(List<int> buildingsIds)
+            => Ok(await _buildingsService.GetAllBuildingsByIds(buildingsIds));
         
         [HttpPost]
         public async Task<IActionResult> AddBuilding(BuildingDto building)

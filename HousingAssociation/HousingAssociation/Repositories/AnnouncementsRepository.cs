@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HousingAssociation.DataAccess;
@@ -9,10 +10,19 @@ namespace HousingAssociation.Repositories
 {
     public class AnnouncementsRepository
     {
+        private readonly AppDbContext _dbContext;
         private readonly DbSet<Announcement> _announcements;
         public AnnouncementsRepository(AppDbContext dbContext)
         {
+            _dbContext = dbContext;
             _announcements = dbContext.Announcements;
+        }
+
+        public async Task CancelOldAnnouncements()
+        {
+            await _dbContext.Database
+                .ExecuteSqlInterpolatedAsync(
+                    $"UPDATE announcements SET expired={DateTimeOffset.Now} WHERE cancelled = NULL AND expired = NULL AND expiration_date <= {DateTimeOffset.Now}");
         }
         public async Task<bool> CheckIfExistsAsync(Announcement announcement)
         {

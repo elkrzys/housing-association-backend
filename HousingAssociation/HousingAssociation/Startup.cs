@@ -152,7 +152,6 @@ namespace HousingAssociation
             
             app.UseSerilogRequestLogging();
             app.UseMiddleware<ExceptionHandlingMiddleware>();
-            //app.UseMiddleware<JwtMiddleware>();
             app.UseRouting();
             
             app.UseAuthentication();

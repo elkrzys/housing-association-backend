@@ -3,15 +3,17 @@ using System;
 using HousingAssociation.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace HousingAssociation.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220109121711_RemoveUnusedColumns")]
+    partial class RemoveUnusedColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -105,9 +107,8 @@ namespace HousingAssociation.Migrations
                         .HasColumnName("cancelled");
 
                     b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("content");
 
                     b.Property<DateTimeOffset>("Created")
@@ -127,7 +128,6 @@ namespace HousingAssociation.Migrations
                         .HasColumnName("previous_announcement_id");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("title");
@@ -209,9 +209,7 @@ namespace HousingAssociation.Migrations
                         .HasColumnName("removes");
 
                     b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("text")
                         .HasColumnName("title");
 
                     b.HasKey("Id")
@@ -240,9 +238,8 @@ namespace HousingAssociation.Migrations
                         .HasColumnName("cancelled");
 
                     b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("content");
 
                     b.Property<DateTimeOffset>("Created")
@@ -262,7 +259,6 @@ namespace HousingAssociation.Migrations
                         .HasColumnName("source_local_id");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("title");

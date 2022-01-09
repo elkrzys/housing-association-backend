@@ -57,5 +57,13 @@ namespace HousingAssociation.Repositories
                         .ThenInclude(b => b.Address)
                 .Where(issue => issue.AuthorId == authorId && issue.Cancelled == null)
                 .ToListAsync();
+        
+        public async Task<List<Issue>> FindAllByResidentLocals(IEnumerable<int> localsIds) =>
+            await _issues
+                .Include(issue => issue.Local)
+                    .ThenInclude(issue => issue.Building)
+                        .ThenInclude(b => b.Address)
+                .Where(issue => localsIds.Any(id => id == issue.Local.Id) && issue.Cancelled == null)
+                .ToListAsync();
     }
 }

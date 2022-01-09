@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HousingAssociation.DataAccess.Entities
 {
     public record Announcement : Event
     {
-        [Required] public AnnouncementType Type { get; set; }
         [ForeignKey("PreviousAnnouncement")] public int? PreviousAnnouncementId { get; set; }
         public List<Building> TargetBuildings { get; set; }
         public DateTimeOffset? ExpirationDate { get; set; }

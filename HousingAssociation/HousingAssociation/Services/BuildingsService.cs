@@ -39,28 +39,22 @@ namespace HousingAssociation.Services
         public async Task<int> AddBuildingWithAddress(BuildingDto buildingDto)
         {
             var address = await _unitOfWork.AddressesRepository.AddNewAddressOrReturnExisting(buildingDto.Address);
+            _unitOfWork.SetModified(address);
+
             var building = new Building
             {
                 Number = buildingDto.Number,
-                Type = buildingDto.Type
+                Type = buildingDto.Type,
+                Address = address
             };
             
-            if (address.Id is not 0)
+            var existingBuildingId = await GetBuildingIdIfExists(building);
+            if (existingBuildingId is not null)
             {
-                building.AddressId = address.Id;
-            }
-            else
-            {
-                building.Address = address;
-            }
-
-            var exists = await _unitOfWork.BuildingsRepository.CheckIfExistsAsync(building);
-            if (exists)
-            {
-                Log.Warning("Building already exists.");
+                Log.Warning($"Trying to add the same building as building with id = {existingBuildingId}");
                 throw new BadRequestException("Building already exists.");
             }
-            
+
             await _unitOfWork.BuildingsRepository.AddAsync(building);
             await _unitOfWork.CommitAsync();
             return building.Id;
@@ -69,6 +63,23 @@ namespace HousingAssociation.Services
         {
             var buildings = await _unitOfWork.BuildingsRepository.FindByAddressAsync(address);
             return GetBuildingsAsDtos(buildings);
+        }
+
+        public async Task<List<BuildingDto>> GetAllBuildingsByIds(List<int> ids)
+        {
+            if (!ids.Any())
+            {
+                Log.Warning("Required buildings ids.");
+                throw new BadRequestException("Request without buildings ids.");
+            }
+
+            List<BuildingDto> buildingsDtos = new();
+            foreach (var id in ids)
+            {
+                var building = await _unitOfWork.BuildingsRepository.FindByIdWithDetailsAsync(id);
+                buildingsDtos.Add(building.AsDto());
+            }
+            return buildingsDtos;
         }
 
         public async Task Update(BuildingDto buildingDto)
@@ -111,6 +122,13 @@ namespace HousingAssociation.Services
 
         private List<BuildingDto> GetBuildingsAsDtos(IEnumerable<Building> buildings)
             => buildings.Select(building => building.AsDto()).ToList();
+
+        private async Task<int?> GetBuildingIdIfExists(Building building)
+        {
+            var buildingsWithTheSameAddress =
+                await _unitOfWork.BuildingsRepository.FindByAddressAsync(building.Address);
+            return buildingsWithTheSameAddress.FirstOrDefault(b => b.Number.Equals(building.Number))?.Id;
+        }
 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using HousingAssociation.DataAccess;
 using HousingAssociation.DataAccess.Entities;
@@ -34,8 +35,7 @@ namespace HousingAssociation.Services
             {
                 Number = localDto.Number,
                 BuildingId = localDto.BuildingId!.Value,
-                Area = localDto.Area,
-                IsFullyOwned = localDto.IsFullyOwned ?? false
+                Area = localDto.Area
             };
 
             if (await _unitOfWork.LocalsRepository.CheckIfExists(local))
@@ -56,7 +56,8 @@ namespace HousingAssociation.Services
             }
             
             var locals= await _unitOfWork.LocalsRepository.FindAllByBuildingIdAsync(buildingId);
-            return GetLocalsAsDtos(locals);
+            var sorted = locals.OrderBy(local => local.Number).ToList();
+            return GetLocalsAsDtos(sorted);
         }
 
         public async Task AddResidentToLocal(int localId, int residentId)
@@ -115,7 +116,6 @@ namespace HousingAssociation.Services
 
             local.Area = localDto.Area;
             local.Number = localDto.Number;
-            local.IsFullyOwned = localDto.IsFullyOwned ?? local.IsFullyOwned;
             
             _unitOfWork.LocalsRepository.Update(local);
             await _unitOfWork.CommitAsync();

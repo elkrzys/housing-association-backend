@@ -41,11 +41,6 @@ namespace HousingAssociation.DataAccess
                 entity.HasMany(u => u.ReceivedDocuments)
                     .WithMany(d => d.Receivers)
                     .UsingEntity(join => join.ToTable("users_documents"));
-
-                // entity.HasOne(u => u.Document)
-                //     .WithOne(d => d.Author)
-                //     .HasForeignKey<Document>(d => d.AuthorId)
-                //     .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<Document>(entity =>
@@ -79,10 +74,6 @@ namespace HousingAssociation.DataAccess
 
             modelBuilder.Entity<Announcement>(entity =>
             {
-                entity.Property(a => a.Type)
-                    .HasConversion(v => v.ToString(),
-                        v => (AnnouncementType) Enum.Parse(typeof(AnnouncementType), v));
-
                 entity.HasMany(a => a.TargetBuildings)
                     .WithMany(b => b.Announcements)
                     .UsingEntity(join => join.ToTable("announcements_buildings"));

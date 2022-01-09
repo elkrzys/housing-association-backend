@@ -47,19 +47,6 @@ namespace HousingAssociation.Controllers
             SetRefreshTokenCookie(newLoginResponse.RefreshToken);
             return Ok(newLoginResponse);
         }
-        
-        // [HttpPost("revoke-refresh-token")]
-        // public async Task<IActionResult> RevokeToken(RevokeTokenRequest request)
-        // {
-        //     // accept refresh token in request body or cookie
-        //     var token = request.Token ?? Request.Cookies["refreshToken"];
-        //
-        //     if (string.IsNullOrEmpty(token))
-        //         return BadRequest(new { message = "Token is required" });
-        //
-        //     await _authService.RevokeToken(token);
-        //     return Ok();
-        // }
 
         private void SetRefreshTokenCookie(string token)
         {
