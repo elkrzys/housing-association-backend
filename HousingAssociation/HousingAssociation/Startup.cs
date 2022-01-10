@@ -56,11 +56,8 @@ namespace HousingAssociation
             
             services.AddSwaggerGen();
             
-            // Jwt configuration v1
-            //services.Configure<JwtConfig>(Configuration.GetSection("JwtConfig"));
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
             
-            // Jwt configuration v1
             var jwtConfig = Configuration.GetSection("JwtConfig").Get<JwtConfig>();
             services.AddSingleton(jwtConfig);
             
@@ -93,7 +90,6 @@ namespace HousingAssociation
                 options.UseNpgsql(dbSettings.ConnectionString)
                     .UseSnakeCaseNamingConvention()
                     .UseEnumCheckConstraints()
-                    //.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
             );
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -136,13 +132,6 @@ namespace HousingAssociation
                     Path.Combine(env.WebRootPath, "documents")),
                 RequestPath = "/documents"
             });
-            
-            // app.UseDirectoryBrowser(new DirectoryBrowserOptions
-            // {
-            //     FileProvider = new PhysicalFileProvider(
-            //         Path.Combine(env.WebRootPath, "documents")),
-            //     RequestPath = "/documents"
-            // });
 
             app.UseCors(x => x
                 .SetIsOriginAllowed(origin => true)

@@ -1,11 +1,13 @@
 ﻿using System.Threading.Tasks;
 using HousingAssociation.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HousingAssociation.Controllers
 {
     [ApiController]
     [Route("addresses")]
+    [Authorize(Roles = "Worker,Resident")]
     public class AddressesController : ControllerBase
     {
         private readonly AddressesService _addressesService;

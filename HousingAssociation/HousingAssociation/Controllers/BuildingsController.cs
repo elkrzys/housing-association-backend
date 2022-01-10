@@ -3,11 +3,13 @@ using System.Threading.Tasks;
 using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.Models.DTOs;
 using HousingAssociation.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HousingAssociation.Controllers
 {
     [ApiController]
+    [Authorize(Roles = "Worker")]
     [Route("buildings")]
     public class BuildingsController : ControllerBase
     {
@@ -21,7 +23,6 @@ namespace HousingAssociation.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id) => Ok(await _buildingsService.GetById(id));
 
-        //TODO: make this controller available only for worker and admin
         [HttpGet]
         public async Task<IActionResult> GetAllBuildings() => Ok(await _buildingsService.GetAll());
         
@@ -30,7 +31,7 @@ namespace HousingAssociation.Controllers
             => Ok(await _buildingsService.GetAllBuildingsByAddress(new Address {City = city, District = district, Street = street}));
         
         [HttpPost("get-all-by-ids")]
-        public async Task<IActionResult> GetAllBuildingsByAddress(List<int> buildingsIds)
+        public async Task<IActionResult> GetAllBuildingsByIds(List<int> buildingsIds)
             => Ok(await _buildingsService.GetAllBuildingsByIds(buildingsIds));
         
         [HttpPost]

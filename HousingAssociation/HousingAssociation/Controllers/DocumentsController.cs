@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using HousingAssociation.Controllers.Requests;
 using HousingAssociation.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HousingAssociation.Controllers
@@ -15,39 +16,33 @@ namespace HousingAssociation.Controllers
         {
             _documentsService = documentsService;
         }
-
-        // admin, worker
+        
+        [Authorize(Roles = "Worker, Resident")]
         [HttpGet]
         public async Task<IActionResult> GetAllDocuments()
             => Ok(await _documentsService.FindAll());
         
-        
-        // // admin, worker, resident
-        // [HttpGet("{id:int}")]
-        // public async Task<IActionResult> GetDocumentById(int id)
-        // {
-        //     return Ok(await _documentsService.FindById(id));
-        // }
-        
-        // admin, worker, resident
+        [Authorize(Roles = "Worker, Resident")]
         [HttpGet("author/{authorId:int}")]
         public async Task<IActionResult> GetDocumentsByAuthorId(int authorId)
             => Ok(await _documentsService.FindAllByAuthorId(authorId));
 
+        [Authorize(Roles = "Worker, Resident")]
         [HttpGet("all-from-association")]
         public async Task<IActionResult> GetAllAssociationDocuments()
             => Ok(await _documentsService.FindAllSendByAssociation());
         
+        [Authorize(Roles = "Worker")]
         [HttpGet("all-from-residents")]
         public async Task<IActionResult> GetAllFromResidents()
             => Ok(await _documentsService.FindAllSendByResidents());
         
+        [Authorize(Roles = "Worker, Resident")]
         [HttpGet("receiver/{receiverId:int}")]
         public async Task<IActionResult> GetDocumentsByReceiverId(int receiverId)
             => Ok(await _documentsService.FindAllByReceiverId(receiverId));
-        
 
-        //admin, worker, resident
+        [Authorize(Roles = "Worker, Resident")]
         [HttpPost]
         public async Task<IActionResult> AddDocument([FromForm] UploadDocumentRequest request)
         {
@@ -55,7 +50,7 @@ namespace HousingAssociation.Controllers
             return Ok();
         }
         
-        // admin, worker
+        [Authorize(Roles = "Worker, Resident")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteDocument(int id)
         {

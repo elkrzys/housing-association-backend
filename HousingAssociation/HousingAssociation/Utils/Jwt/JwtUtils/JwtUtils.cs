@@ -23,7 +23,6 @@ namespace HousingAssociation.Utils.Jwt.JwtUtils
 
         public string GenerateJwtToken(User user)
         {
-            // generate token that is valid for 15 minutes
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -40,41 +39,8 @@ namespace HousingAssociation.Utils.Jwt.JwtUtils
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-
-        //TODO: make sure it's not needed (validation in Startup) and remove
-        public int? ValidateJwtToken(string token)
-        {
-            if (token == null) return null;
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            try
-            {
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(_key),
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
-
-                var jwtToken = (JwtSecurityToken) validatedToken;
-                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
-
-                // return user id from JWT token if validation successful
-                return userId;
-            }
-            catch
-            {
-                // return null if validation fails
-                return null;
-            }
-        }
-
         public RefreshToken GenerateRefreshToken()
         {
-            // generate token that is valid for 7 days
             using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
             var randomBytes = new byte[64];
             rngCryptoServiceProvider.GetBytes(randomBytes);

@@ -4,6 +4,7 @@ using HousingAssociation.Controllers.Requests;
 using HousingAssociation.DataAccess.Entities;
 using HousingAssociation.Models.DTOs;
 using HousingAssociation.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HousingAssociation.Controllers
@@ -19,24 +20,29 @@ namespace HousingAssociation.Controllers
             _usersService = usersService;
         }
 
+        [Authorize(Roles = "Worker, Resident")]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetUser(int id)
             => Ok(await _usersService.FindUserById(id));
         
+        [Authorize(Roles = "Worker")]
         [HttpGet("residents")]
         public async Task<ActionResult<List<UserDto>>> GetResidents()
             => Ok(await _usersService.FindAllResidents());
 
+        [Authorize(Roles = "Worker")]
         [HttpGet("workers")]
         public async Task<ActionResult<List<UserDto>>> GetWorkers()
             => Ok(await _usersService.FindAllWorkers());
 
+        [Authorize(Roles = "Worker")]
         [HttpPost("workers")]
         public async Task<IActionResult> AddNewWorker(UserDto userDto)
         {
             return Ok(await _usersService.AddWorker(userDto));
         }
 
+        [Authorize(Roles = "Worker, Resident")]
         [HttpPut("unregister/{id:int}")]
         public async Task<IActionResult> UnregisterUser(int id, [FromBody] string password)
         {
@@ -44,6 +50,7 @@ namespace HousingAssociation.Controllers
             return Ok();
         }
         
+        [Authorize(Roles = "Worker")]
         [HttpPut("ban/{id:int}")]
         public async Task<IActionResult> BanUser(int id)
         {
@@ -51,6 +58,7 @@ namespace HousingAssociation.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Worker, Resident")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, UserDto user)
         {
@@ -58,17 +66,11 @@ namespace HousingAssociation.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Worker, Resident")]
         [HttpPut("{id:int}/change-password")]
         public async Task<IActionResult> ChangePassword(int id, ChangePasswordRequest request)
         {
             await _usersService.ChangePassword(id, request);
-            return Ok();
-        }
-
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            await _usersService.DeleteUser(id);
             return Ok();
         }
     }

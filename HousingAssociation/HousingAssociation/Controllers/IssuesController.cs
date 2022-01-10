@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using HousingAssociation.Models.DTOs;
 using HousingAssociation.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HousingAssociation.Controllers
@@ -16,15 +17,19 @@ namespace HousingAssociation.Controllers
             _issuesService = issuesService;
         }
 
+        [Authorize(Roles = "Worker")]
         [HttpGet]
         public async Task<IActionResult> GetAllNotCancelled() => Ok(await _issuesService.GetAllActual());
         
+        [Authorize(Roles = "Worker, Resident")]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id) => Ok(await _issuesService.GetById(id));
         
+        [Authorize(Roles = "Worker, Resident")]
         [HttpGet("author/{authorId:int}")]
         public async Task<IActionResult> GetByAuthorId(int authorId) => Ok(await _issuesService.GetAllByAuthorId(authorId));
         
+        [Authorize(Roles = "Resident")]
         [HttpPost]
         public async Task<IActionResult> AddIssue(IssueDto issue)
         {
@@ -32,6 +37,7 @@ namespace HousingAssociation.Controllers
             return Ok();
         }
         
+        [Authorize(Roles = "Resident")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateIssue(int id, IssueDto issueDto)
         {
@@ -40,6 +46,7 @@ namespace HousingAssociation.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Worker")]
         [HttpPut("resolve/{id:int}")]
         public async Task<IActionResult> ResolveIssue(int id)
         {
@@ -47,6 +54,7 @@ namespace HousingAssociation.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Resident")]
         [HttpPut("cancel/{id:int}")]
         public async Task<IActionResult> CancelIssue(int id)
         {
