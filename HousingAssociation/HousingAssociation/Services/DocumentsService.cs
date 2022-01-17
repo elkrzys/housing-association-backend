@@ -41,7 +41,7 @@ namespace HousingAssociation.Services
         public async Task<List<DocumentDto>> FindAll()
         {
             var documents = await _unitOfWork.DocumentsRepository.FindAllAsync();
-            documents = await DeleteExpiredDocuments(documents);
+            documents = await DeleteExpiredDocumentsAndReturnRest(documents);
             return DocumentsToDocumentsDtos(documents);
         }
 
@@ -67,18 +67,21 @@ namespace HousingAssociation.Services
                 throw new NotFoundException();
             }
             var documents = await _unitOfWork.DocumentsRepository.FindAllByReceiverAsync(receiverId);
+            documents = await DeleteExpiredDocumentsAndReturnRest(documents);
             return DocumentsToDocumentsDtos(documents);
         }
         
         public async Task<List<DocumentDto>> FindAllSendByAssociation()
         {
             var documents = await _unitOfWork.DocumentsRepository.FindAllWhereReceiversNotEmpty();
+            documents = await DeleteExpiredDocumentsAndReturnRest(documents);
             return DocumentsToDocumentsDtos(documents);
         }
         
         public async Task<List<DocumentDto>> FindAllSendByResidents()
         {
             var documents = await _unitOfWork.DocumentsRepository.FindAllWhereReceiversEmpty();
+            documents = await DeleteExpiredDocumentsAndReturnRest(documents);
             return DocumentsToDocumentsDtos(documents);
         }
 
@@ -94,15 +97,15 @@ namespace HousingAssociation.Services
             
             var documentMd5 = await GetMd5(request.DocumentFile);
             var existingDocument = await _unitOfWork.DocumentsRepository.FindByHashAsync(documentMd5);
-            if (existingDocument is not null)
-            {
-                await UpdateReceivers(existingDocument, request.ReceiversIds);
-                return;
-            }
-           
+
             List<User> documentReceivers = null;
             if (author.Role is not Role.Resident)
             {
+                if (existingDocument is not null)
+                {
+                    await UpdateReceivers(existingDocument, request.ReceiversIds);
+                    return;
+                }
                 if (request.ReceiversIds is not null)
                 {
                     documentReceivers = await GetReceiversByIds(request.ReceiversIds);
@@ -113,8 +116,10 @@ namespace HousingAssociation.Services
                 }
                 _unitOfWork.SetModified(documentReceivers);
             }
-
-            var path = await SaveFileAndReturnFileName(request.DocumentFile);
+            
+            var path = existingDocument is null
+                ? await SaveFileAndReturnFileName(request.DocumentFile)
+                : existingDocument.Filepath;
             
             var document = new Document
             {
@@ -208,7 +213,16 @@ namespace HousingAssociation.Services
             }
             _unitOfWork.DocumentsRepository.DeleteDocument(document);
             await _unitOfWork.CommitAsync();
-            DeleteFromFileSystem(document.Filepath);
+            if (!await CheckIfOtherDocumentsExistWithTheSameName(document.Filepath))
+            {
+                DeleteFromFileSystem(document.Filepath);
+            }
+        }
+
+        private async Task<bool> CheckIfOtherDocumentsExistWithTheSameName(string name)
+        {
+            int sameNameDocumentsCount = await _unitOfWork.DocumentsRepository.CountAllByFilePathAsync(name);
+            return sameNameDocumentsCount > 1;
         }
 
         private void DeleteFromFileSystem(string filename)
@@ -218,7 +232,7 @@ namespace HousingAssociation.Services
                 File.Delete(path);
         }
 
-        private async Task<List<Document>> DeleteExpiredDocuments(List<Document> documents)
+        private async Task<List<Document>> DeleteExpiredDocumentsAndReturnRest(List<Document> documents)
         {
             var expiredDocuments = documents.Where(d =>
                 d.Removes != null && DateTimeOffset.Now.Date >= d.Removes?.Date).ToList();

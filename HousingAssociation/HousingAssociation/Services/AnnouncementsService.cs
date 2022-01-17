@@ -99,37 +99,12 @@ namespace HousingAssociation.Services
                 }
             });
         }
-
-        public async Task DeleteAnnouncement(int id)
-        {
-            var announcement = await _unitOfWork.AnnouncementsRepository.FindByIdAsync(id);
-            if (announcement is null)
-            {
-                Log.Warning($"Announcement with id = {id} doesn't exist.");
-                throw new NotFoundException();
-            }
-            _unitOfWork.AnnouncementsRepository.Delete(announcement);
-            await _unitOfWork.CommitAsync();
-        }
-
         public async Task<List<AnnouncementDto>> GetAll()
         {
-            await _unitOfWork.AnnouncementsRepository.CancelOldAnnouncements();
+            await _unitOfWork.AnnouncementsRepository.UpdateExpiredAsync();
             var announcements = await _unitOfWork.AnnouncementsRepository.FindAllNotCancelledAsync();
             return GetAnnouncementsAsDtos(announcements);
         }
-
-        public async Task<List<AnnouncementDto>> GetAllByBuildingId(int buildingId)
-        {
-            if (await _unitOfWork.BuildingsRepository.FindByIdAsync(buildingId) is null)
-            {
-                Log.Warning($"Building with id = {buildingId} doesn't exist.");
-                throw new NotFoundException();
-            }
-            var announcements = await _unitOfWork.AnnouncementsRepository.FindNotCancelledByTargetBuildingIdAsync(buildingId);
-            return GetAnnouncementsAsDtos(announcements);
-        }
-        
         public async Task<List<AnnouncementDto>> GetAllByAddress(Address address)
         {
             if (address is null)
@@ -143,7 +118,7 @@ namespace HousingAssociation.Services
 
         public async Task<List<AnnouncementDto>> GetAllByReceiverId(int receiverId)
         {
-            await _unitOfWork.AnnouncementsRepository.CancelOldAnnouncements();
+            await _unitOfWork.AnnouncementsRepository.UpdateExpiredAsync();
             var receiver = await _unitOfWork.UsersRepository.FindByIdAndIncludeAllLocalsAsync(receiverId); 
             if(receiver is null){               
                 Log.Warning($"User with id = {receiverId} doesn't exists.");
@@ -168,7 +143,7 @@ namespace HousingAssociation.Services
 
         public async Task<List<AnnouncementDto>> GetAllByAuthorId(int authorId)
         {
-            await _unitOfWork.AnnouncementsRepository.CancelOldAnnouncements();
+            await _unitOfWork.AnnouncementsRepository.UpdateExpiredAsync();
             if (await _unitOfWork.UsersRepository.FindByIdAsync(authorId) is null)
             {
                 Log.Warning($"User with id = {authorId} doesn't exist.");

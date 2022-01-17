@@ -45,8 +45,10 @@ namespace HousingAssociation.Repositories
                 .Include(document => document.Author)
                 .Include(document => document.Receivers)
                 .SingleOrDefaultAsync(document => document.Md5.Equals(hash));
-        public async Task<List<string>> FindAllDocumentHashes()
-            => await _documents.Select(d => d.Md5).ToListAsync();
+
+        public async Task<int> CountAllByFilePathAsync(string path)
+            => await _documents
+                .CountAsync(document => document.Filepath.Equals(path));
         public void DeleteDocument(Document document) => _documents.Remove(document);
     }
 }

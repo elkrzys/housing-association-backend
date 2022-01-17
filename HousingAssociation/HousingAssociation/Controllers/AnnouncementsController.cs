@@ -36,13 +36,6 @@ namespace HousingAssociation.Controllers
         public async Task<IActionResult> GetAllAnnouncementsByAuthorId(int authorId)
             => Ok(await _announcementsService.GetAllByAuthorId(authorId));
         
-        // worker, admin
-        // [HttpPost("filter")]
-        // public async Task<IActionResult> GetAllByFilters(AnnouncementsFilterRequest filter)
-        // {
-        //     return Ok(await _announcementsService.GetAllFiltered(filter));
-        // }
-
         [Authorize(Roles = "Worker")]
         [HttpPost("add-by-address")]
         public async Task<IActionResult> AddByAddress(AnnouncementDto announcement)

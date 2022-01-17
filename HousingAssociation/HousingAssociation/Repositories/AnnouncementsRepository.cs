@@ -18,12 +18,9 @@ namespace HousingAssociation.Repositories
             _announcements = dbContext.Announcements;
         }
 
-        public async Task CancelOldAnnouncements()
-        {
-            await _dbContext.Database
-                .ExecuteSqlInterpolatedAsync(
-                    $"UPDATE announcements SET expired={DateTimeOffset.Now} WHERE cancelled = NULL AND expired = NULL AND expiration_date <= {DateTimeOffset.Now}");
-        }
+        public async Task UpdateExpiredAsync() =>
+            await _dbContext.Database.ExecuteSqlRawAsync("SELECT update_expired_announcements()");
+        
         public async Task<bool> CheckIfExistsAsync(Announcement announcement)
         {
             var similarAnnouncements =  await _announcements
