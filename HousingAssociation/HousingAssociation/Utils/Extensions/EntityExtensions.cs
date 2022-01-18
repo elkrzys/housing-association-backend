@@ -74,6 +74,8 @@ namespace HousingAssociation.Utils.Extensions
                 Resolved = issue.Resolved?.ToString("yyyy-MM-ddTHH:mm:ss"),
                 SourceBuildingId = issue.Local?.BuildingId,
                 SourceLocalId = issue.SourceLocalId ?? 0,
+                LocalNumber = issue.Local?.Number ?? "0",
+                BuildingNumber = issue.Local?.Building.Number ?? "0",
                 Address = issue.Local?.Building?.Address,
                 Author = new Author
                 {
