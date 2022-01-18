@@ -17,6 +17,7 @@ namespace HousingAssociationTests
     public class BuildingsServiceTests
     {
         private BuildingsRepository _buildings;
+        private AddressesRepository _addresses;
         private BuildingsService _buildingsService;
         private AppDbContext _dbContext;
         private DbContextOptions<AppDbContext> _dbContextOptions = new DbContextOptionsBuilder<AppDbContext>()
@@ -28,6 +29,7 @@ namespace HousingAssociationTests
         {
             _dbContext = new AppDbContext(_dbContextOptions);
             _buildings = new BuildingsRepository(_dbContext);
+            _addresses = new AddressesRepository(_dbContext);
             _buildingsService = new BuildingsService(new UnitOfWork(_dbContext));
         }
         [TearDown]
@@ -53,6 +55,10 @@ namespace HousingAssociationTests
                 District = "Paprocany",
                 Street = "Malinowa"
             };
+
+            await _addresses.Add(address1);
+            await _addresses.Add(address2);
+            await _dbContext.SaveChangesAsync();
             
             Building building1 = new Building
             {
@@ -101,6 +107,10 @@ namespace HousingAssociationTests
                 District = "Paprocany",
                 Street = "Malinowa"
             };
+            
+            await _addresses.Add(address);
+            await _dbContext.SaveChangesAsync();
+            
             Building building = new Building
             {
                 Type = BuildingType.Block,

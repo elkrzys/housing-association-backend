@@ -39,15 +39,17 @@ namespace HousingAssociation.Services
         public async Task<int> AddBuildingWithAddress(BuildingDto buildingDto)
         {
             var address = await _unitOfWork.AddressesRepository.AddNewAddressOrReturnExisting(buildingDto.Address);
-            _unitOfWork.SetModified(address);
-
+            if (address.Id is not 0)
+            {
+                _unitOfWork.SetModified(address);
+            }
             var building = new Building
             {
                 Number = buildingDto.Number,
                 Type = buildingDto.Type,
                 Address = address
             };
-            
+
             var existingBuildingId = await GetBuildingIdIfExists(building);
             if (existingBuildingId is not null)
             {

@@ -80,22 +80,18 @@ namespace HousingAssociation.Services
 
             var passwordHash = (await _unitOfWork.UserCredentialsRepository.FindByUserId(user.Id)).PasswordHash;
 
-            // validate
             if (!BCrypt.Net.BCrypt.Verify(request.Password, passwordHash))
                 throw new BadRequestException("Email or password incorrect");
 
             if (!user.IsEnabled)
                 throw new BadRequestException("User is not enabled");
 
-            // authentication successful so generate jwt and refresh tokens
             var jwtToken = _jwtUtils.GenerateJwtToken(user);
             var refreshToken = _jwtUtils.GenerateRefreshToken();
             user.RefreshTokens.Add(refreshToken);
 
-            // remove old refresh tokens from user
             RemoveOldRefreshTokens(user);
 
-            // save changes to db
             _unitOfWork.UsersRepository.Update(user);
             await _unitOfWork.CommitAsync();
 
@@ -120,7 +116,6 @@ namespace HousingAssociation.Services
 
             if (refreshToken.IsRevoked)
             {
-                // revoke all descendant tokens in case this token has been compromised
                 RevokeDescendantRefreshTokens(refreshToken, user, $"Attempted reuse of revoked ancestor token: {token}");
                 _unitOfWork.UsersRepository.Update(user);
                 await _unitOfWork.CommitAsync();
@@ -129,18 +124,14 @@ namespace HousingAssociation.Services
             if (!refreshToken.IsActive)
                 throw new BadRequestException("Invalid token");
 
-            // replace old refresh token with a new one (rotate token)
             var newRefreshToken = RotateRefreshToken(refreshToken);
             user.RefreshTokens.Add(newRefreshToken);
 
-            // remove old refresh tokens from user
             RemoveOldRefreshTokens(user);
 
-            // save changes to db
             _unitOfWork.UsersRepository.Update(user);
             await _unitOfWork.CommitAsync();
 
-            // generate new jwt
             var jwtToken = _jwtUtils.GenerateJwtToken(user);
 
             return new LoginResponse(user, jwtToken, newRefreshToken.Token);
@@ -155,8 +146,7 @@ namespace HousingAssociation.Services
 
             if (!refreshToken.IsActive)
                 throw new BadRequestException("Invalid token");
-
-            // revoke token and save
+            
             RevokeRefreshToken(refreshToken, "Revoked without replacement");
             _unitOfWork.UsersRepository.Update(user);
             await _unitOfWork.CommitAsync();
@@ -164,7 +154,6 @@ namespace HousingAssociation.Services
         
         private void RemoveOldRefreshTokens(User user)
         {
-            // remove old inactive refresh tokens from user based on TTL in app settings
             user.RefreshTokens.RemoveAll(token => 
                 !token.IsActive && 
                 token.Created.AddDays(_jwtConfig.RefreshTokenTTL) <= DateTime.UtcNow);
@@ -179,7 +168,6 @@ namespace HousingAssociation.Services
 
         private void RevokeDescendantRefreshTokens(RefreshToken refreshToken, User user, string reason)
         {
-            // recursively traverse the refresh token chain and ensure all descendants are revoked
             if(!string.IsNullOrEmpty(refreshToken.ReplacedByToken))
             {
                 var childToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken.ReplacedByToken);

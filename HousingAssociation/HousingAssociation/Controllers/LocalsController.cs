@@ -68,7 +68,6 @@ namespace HousingAssociation.Controllers
             return Ok();
         }
         
-        //TODO: optionally set all related issues as cancelled
         [Authorize(Roles = "Resident")]
         [HttpDelete("remove-resident/{localId:int}/{residentId:int}")]
         public async Task<IActionResult> RemoveLocalResident(int localId, int residentId)
